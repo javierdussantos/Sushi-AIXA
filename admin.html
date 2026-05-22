@@ -473,7 +473,8 @@ body{display:flex;flex-direction:column;}
     </div>
   </div>
 
-  <div id="carta-container"></div>
+  <div style="margin-bottom:10px;"><button class="btn-sm" onclick="recargarCarta()">🔄 Recargar carta desde BD</button></div>
+  <div id="carta-container"><div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">⏳ Cargando carta desde base de datos...</div></div>
 
   <div class="card" style="margin-top:14px;">
     <div class="card-header"><span class="card-title">➕ Agregar nuevo plato</span></div>
@@ -1457,7 +1458,7 @@ function descargar(contenido,nombre,tipo){
 // INIT
 // ═══════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded',function(){
-  initSupabase().then(() => suscribirPedidos());
+  // Mostrar loading en carta mientras Supabase carga
   var hoy=new Date().toISOString().split('T')[0];
   var cf=document.getElementById('c-fecha'); if(cf) cf.value=hoy;
   var af=document.getElementById('act-fecha'); if(af) af.value=hoy;
@@ -1705,13 +1706,18 @@ async function cargarDatosIniciales() {
 
     // Cargar carta
     const { data: cart } = await supabase.from('carta').select('*').order('orden');
-    if(cart) {
+    if(cart && cart.length > 0) {
       platos = {};
       cart.forEach(p => {
         if(!platos[p.categoria]) platos[p.categoria] = [];
         platos[p.categoria].push(p.nombre + '|$' + parseInt(p.precio).toLocaleString('es-CL'));
         platosActivos[p.categoria + '_' + (platos[p.categoria].length-1)] = p.activo;
       });
+      renderCarta();
+      console.log('✅ Carta cargada:', cart.length, 'platos');
+    } else {
+      console.warn('⚠️ No se encontraron platos en Supabase');
+      // Usar carta local como fallback
       renderCarta();
     }
 
@@ -1890,6 +1896,35 @@ async function suscribirPedidos() {
         parseInt(document.getElementById('badge-p').textContent||0) + 1;
     })
     .subscribe();
+}
+
+
+async function recargarCarta(){
+  var cont = document.getElementById('carta-container');
+  cont.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);">⏳ Cargando...</div>';
+  if(!supabase){
+    renderCarta();
+    return;
+  }
+  try {
+    const { data: cart, error } = await supabase.from('carta').select('*').order('orden');
+    if(error) throw error;
+    if(cart && cart.length > 0){
+      platos = {};
+      cart.forEach(function(p){
+        if(!platos[p.categoria]) platos[p.categoria] = [];
+        platos[p.categoria].push(p.nombre + '|$' + parseInt(p.precio).toLocaleString('es-CL'));
+        platosActivos[p.categoria + '_' + (platos[p.categoria].length-1)] = p.activo;
+      });
+      renderCarta();
+      mostrarToast('✅ Carta actualizada — ' + cart.length + ' platos');
+    } else {
+      cont.innerHTML = '<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;">No hay platos en la base de datos. Ejecuta el script SQL inicial.</div>';
+    }
+  } catch(e) {
+    console.error('Error cargando carta:', e);
+    cont.innerHTML = '<div style="padding:14px;color:var(--danger);font-size:12px;">Error: ' + e.message + '</div>';
+  }
 }
 
 </script>
