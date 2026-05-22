@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sushi Aixa — Panel Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --g:#0b3528;--gd:#071f17;--gm:#134a34;--gl:#1a6045;
+  --gold:#c9a84c;--gold-l:#e6c96e;--gold-p:#f5e8c0;--gold-dim:#8a6e2f;
+  --bg:#f4f1ea;--bg2:#fff;--text:#1a1a1a;--muted:#888;
+  --border:#e8ddc8;--success:#16a34a;--warning:#d97706;--danger:#dc2626;--info:#2563eb;
+}
+html,body{height:100%;font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);}
+body{display:flex;flex-direction:column;}
+.topbar{background:var(--gd);border-bottom:1.5px solid var(--gold-dim);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px;flex-shrink:0;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:3px;}
+.topbar-sub{font-size:10px;color:var(--gold-dim);letter-spacing:1px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.status-badge{display:flex;align-items:center;gap:6px;background:rgba(22,163,74,0.15);border:1px solid rgba(22,163,74,0.3);border-radius:20px;padding:4px 12px;cursor:pointer;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.status-text{font-size:11px;color:#22c55e;}
+.topbar-time{font-size:11px;color:var(--gold-dim);font-family:'Cinzel',serif;}
+.nav-tabs{background:var(--g);border-bottom:1px solid rgba(138,110,47,0.25);display:flex;padding:0 8px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.tab{background:none;border:none;color:rgba(245,232,192,0.5);font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;padding:13px 12px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;}
+.tab:hover{color:var(--gold-p);}
+.tab.active{color:var(--gold);border-bottom:2px solid var(--gold);}
+.tab-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--danger);color:#fff;width:16px;height:16px;border-radius:50%;font-size:9px;margin-left:5px;font-family:'Lato',sans-serif;}
+.main{flex:1;overflow-y:auto;padding:16px;}
+.pane{display:none;}
+.pane.active{display:block;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px;}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat.green::before{background:linear-gradient(90deg,var(--g),var(--gold));}
+.stat.gold::before{background:linear-gradient(90deg,var(--gold-dim),var(--gold-l));}
+.stat.blue::before{background:linear-gradient(90deg,#1d4ed8,#60a5fa);}
+.stat.red::before{background:linear-gradient(90deg,#b91c1c,#f87171);}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:5px;}
+.stat-value{font-family:'Cinzel',serif;font-size:20px;font-weight:700;}
+.stat-delta{font-size:10px;margin-top:3px;}
+.stat-delta.up{color:var(--success);}
+.stat-delta.down{color:var(--danger);}
+.stat-delta.neutral{color:var(--muted);}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:16px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--text);letter-spacing:1px;text-transform:uppercase;}
+.card-body{padding:14px 16px;}
+
+/* PEDIDOS */
+.pedido-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background 0.15s;}
+.pedido-item:last-child{border-bottom:none;}
+.pedido-item:hover{background:#faf8f4;}
+.ped-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.ped-info{flex:1;min-width:0;}
+.ped-name{font-size:12px;font-weight:700;}
+.ped-detail{font-size:10px;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ped-right{text-align:right;flex-shrink:0;}
+.ped-price{font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--g);}
+.ped-time{font-size:10px;color:var(--muted);margin-top:1px;}
+.badge{display:inline-block;font-size:9px;padding:2px 7px;border-radius:20px;font-weight:700;margin-top:2px;}
+.b-pending{background:#fef3c7;color:#92400e;}
+.b-prep{background:#dbeafe;color:#1e40af;}
+.b-ready{background:#fce7f3;color:#9d174d;}
+.b-done{background:#f3f4f6;color:#6b7280;}
+.estado-btns{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+.ebtn{font-size:9px;padding:3px 8px;border:none;border-radius:12px;cursor:pointer;font-weight:700;transition:all 0.15s;}
+.ebtn-pending{background:#fef3c7;color:#92400e;}
+.ebtn-prep{background:#dbeafe;color:#1e40af;}
+.ebtn-ready{background:#fce7f3;color:#9d174d;}
+.ebtn-done{background:#d1fae5;color:#065f46;}
+.ebtn.active-estado{opacity:1;transform:scale(1.05);}
+.ebtn:not(.active-estado){opacity:0.5;}
+
+/* CLIENTES */
+.cli-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start;}
+.cli-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.cli-info{flex:1;}
+.cli-name{font-size:13px;font-weight:700;}
+.cli-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+.cli-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+.cli-tag{font-size:9px;padding:2px 7px;background:#f0e8d8;border-radius:20px;color:var(--g);}
+.cli-right{text-align:right;flex-shrink:0;}
+.cli-ltv{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--g);}
+.cli-badge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:700;display:inline-block;margin-top:3px;}
+.bvip{background:#fef3c7;color:#92400e;}
+.bfreq{background:#dbeafe;color:#1e40af;}
+.bnew{background:#d1fae5;color:#065f46;}
+.bcumple{background:#fce7f3;color:#9d174d;}
+
+/* FORMULARIOS */
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.form-input{padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Lato',sans-serif;font-size:12px;color:var(--text);background:#fff;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--gold);}
+.form-select{padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Lato',sans-serif;font-size:12px;color:var(--text);background:#fff;outline:none;}
+.btn-primary{background:var(--g);color:var(--gold);border:none;padding:9px 18px;border-radius:8px;font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all 0.2s;}
+.btn-primary:hover{background:var(--gm);}
+.btn-sm{background:#f0e8d8;color:var(--g);border:1px solid var(--border);padding:5px 10px;border-radius:6px;font-size:10px;cursor:pointer;transition:all 0.15s;}
+.btn-sm:hover{background:var(--g);color:var(--gold);}
+.btn-danger-sm{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;padding:5px 10px;border-radius:6px;font-size:10px;cursor:pointer;}
+
+/* INSUMOS */
+.insumo-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);gap:8px;}
+.insumo-row:hover{background:#faf8f4;}
+.insumo-row:last-child{border-bottom:none;}
+.ins-name{font-size:12px;font-weight:700;flex:1;}
+.ins-meta{font-size:10px;color:var(--muted);}
+.stock-badge{font-size:9px;padding:2px 8px;border-radius:20px;font-weight:700;}
+.sok{background:#d1fae5;color:#065f46;}
+.slow{background:#fef3c7;color:#92400e;}
+.sout{background:#fee2e2;color:#991b1b;}
+
+/* CARTA EDITOR */
+.carta-item{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);}
+.carta-item:last-child{border-bottom:none;}
+.carta-item:hover{background:#faf8f4;}
+.carta-name{flex:1;font-size:12px;}
+.carta-price{font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--g);min-width:65px;text-align:right;}
+.toggle{width:32px;height:17px;border-radius:9px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
+.toggle.on{background:#22c55e;}
+.toggle.off{background:#d1d5db;}
+.toggle::after{content:'';position:absolute;width:13px;height:13px;border-radius:50%;background:#fff;top:2px;transition:left 0.2s;}
+.toggle.on::after{left:17px;}
+.toggle.off::after{left:2px;}
+
+/* CONTABILIDAD */
+.cont-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;}
+.cont-title{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--text);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.cont-badge{font-size:9px;padding:2px 8px;border-radius:20px;}
+.iva-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.iva-row:last-child{border-bottom:none;}
+.iva-row.total{font-weight:700;font-family:'Cinzel',serif;font-size:14px;color:var(--g);margin-top:4px;}
+.iva-row.total td{padding-top:8px;}
+.vtable{width:100%;border-collapse:collapse;font-size:12px;}
+.vtable th{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;padding:7px 8px;text-align:left;border-bottom:1.5px solid var(--border);}
+.vtable td{padding:9px 8px;border-bottom:1px solid var(--border);}
+.vtable tr:last-child td{border-bottom:none;}
+.vtable tr:hover td{background:#faf8f4;}
+.vtable .num{text-align:right;font-family:'Cinzel',serif;font-weight:700;}
+.vtable .pos{color:var(--success);}
+.vtable .neg{color:var(--danger);}
+.alerta{display:flex;align-items:flex-start;gap:8px;padding:9px 12px;border-radius:8px;margin-bottom:7px;font-size:12px;}
+.alerta.warn{background:#fef3c7;border:1px solid #fcd34d;color:#92400e;}
+.alerta.info{background:#dbeafe;border:1px solid #93c5fd;color:#1e40af;}
+.alerta.ok{background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;}
+.alerta.danger{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;}
+.footer-total{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;background:var(--gd);border-radius:0 0 12px 12px;font-family:'Cinzel',serif;color:var(--gold);font-size:13px;font-weight:700;}
+@media(max-width:600px){.stats-grid{grid-template-columns:1fr 1fr;}.grid2{grid-template-columns:1fr;}.main{padding:10px;}.topbar-sub,.topbar-time{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-logo">Sushi Aixa</div>
+    <div class="topbar-sub">Panel Admin · Puerto Montt</div>
+  </div>
+  <div class="topbar-right">
+    <div class="status-badge" onclick="toggleLocal()">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="status-text" id="statusText">Abierto</span>
+    </div>
+    <div class="topbar-time" id="clock">--:--</div>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <button class="tab active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab" onclick="showTab('pedidos',this)">📦 Pedidos <span class="tab-badge" id="badge-p">2</span></button>
+  <button class="tab" onclick="showTab('ventas',this)">💰 Ventas</button>
+  <button class="tab" onclick="showTab('crm',this)">👥 Clientes</button>
+  <button class="tab" onclick="showTab('insumos',this)">📦 Insumos</button>
+  <button class="tab" onclick="showTab('compras',this)">🛒 Compras</button>
+  <button class="tab" onclick="showTab('carta',this)">✏️ Carta</button>
+  <button class="tab" onclick="showTab('caja',this)">🏪 Caja Local</button>
+  <button class="tab" onclick="showTab('contabilidad',this)">📒 Contabilidad</button>
+</div>
+
+<div class="main">
+
+<!-- ══ DASHBOARD ══ -->
+<div id="pane-dashboard" class="pane active">
+  <div class="stats-grid">
+    <div class="stat green"><div class="stat-label">Ventas hoy</div><div class="stat-value" id="sv">$187.450</div><div class="stat-delta up">↑ +12% vs ayer</div></div>
+    <div class="stat gold"><div class="stat-label">Pedidos hoy</div><div class="stat-value">24</div><div class="stat-delta neutral">18 retiro · 6 delivery</div></div>
+    <div class="stat blue"><div class="stat-label">Ticket promedio</div><div class="stat-value">$7.810</div><div class="stat-delta neutral">Meta: $8.000</div></div>
+    <div class="stat red"><div class="stat-label">Margen neto</div><div class="stat-value">34%</div><div class="stat-delta up">↑ +2% esta semana</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">⚡ Alertas</span></div>
+    <div class="card-body" style="padding:10px 14px;">
+      <div class="alerta warn">⚠️ &nbsp;Stock bajo: Salmón fresco — quedan ~3 porciones estimadas</div>
+      <div class="alerta info">💬 &nbsp;2 pedidos nuevos esperando confirmación</div>
+      <div class="alerta ok">🌸 &nbsp;María González · pedido #10 · considera enviarle promo de fidelización</div>
+      <div id="cumple-alert" class="alerta" style="background:#fce7f3;border:1px solid #f9a8d4;color:#9d174d;display:none;">🎂 &nbsp;<span id="cumple-alert-text"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PEDIDOS ══ -->
+<div id="pane-pedidos" class="pane">
+  <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+    <button onclick="filtrarP('todos',this)" class="fpill" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--g);color:var(--gold);font-size:11px;cursor:pointer;">Todos</button>
+    <button onclick="filtrarP('pending',this)" class="fpill" style="padding:5px 12px;border-radius:20px;border:1px solid #fcd34d;background:#fef3c7;color:#92400e;font-size:11px;cursor:pointer;">Pendientes</button>
+    <button onclick="filtrarP('prep',this)" class="fpill" style="padding:5px 12px;border-radius:20px;border:1px solid #93c5fd;background:#dbeafe;color:#1e40af;font-size:11px;cursor:pointer;">En preparación</button>
+    <button onclick="filtrarP('ready',this)" class="fpill" style="padding:5px 12px;border-radius:20px;border:1px solid #f9a8d4;background:#fce7f3;color:#9d174d;font-size:11px;cursor:pointer;">Listo</button>
+    <button onclick="filtrarP('done',this)" class="fpill" style="padding:5px 12px;border-radius:20px;border:1px solid #d1d5db;background:#f3f4f6;color:#6b7280;font-size:11px;cursor:pointer;">Entregados</button>
+  </div>
+  <div class="card" id="pedidos-container">
+    <div class="pedido-item" data-status="pending" id="ped-1">
+      <div class="ped-avatar" style="background:#fef3c7;color:#92400e;">MG</div>
+      <div class="ped-info">
+        <div class="ped-name">María González</div>
+        <div class="ped-detail">Promo Furay 30p · Golden Roll · Salsa Spicy · Delivery</div>
+        <span class="badge b-pending" id="badge-ped-1">Pendiente</span>
+        <div class="estado-btns">
+          <button class="ebtn ebtn-pending active-estado" onclick="cambiarEstado('ped-1','pending')">Pendiente</button>
+          <button class="ebtn ebtn-prep" onclick="cambiarEstado('ped-1','prep')">En prep.</button>
+          <button class="ebtn ebtn-ready" onclick="cambiarEstado('ped-1','ready')">Listo 🔔</button>
+          <button class="ebtn ebtn-done" onclick="cambiarEstado('ped-1','done')">Entregado ✓</button>
+        </div>
+      </div>
+      <div class="ped-right">
+        <div class="ped-price">$21.480</div>
+        <div class="ped-time">Hace 3 min</div>
+        <button onclick="waConfirmar('María González')" style="margin-top:4px;padding:3px 8px;background:#25D366;color:#fff;border:none;border-radius:12px;font-size:10px;cursor:pointer;">💬 WA</button>
+      </div>
+    </div>
+    <div class="pedido-item" data-status="pending" id="ped-2">
+      <div class="ped-avatar" style="background:#ede9fe;color:#5b21b6;">CR</div>
+      <div class="ped-info">
+        <div class="ped-name">Carlos Rojas</div>
+        <div class="ped-detail">Promo Premium 60p · Ceviche Aixa Salmón · Retiro</div>
+        <span class="badge b-pending" id="badge-ped-2">Pendiente</span>
+        <div class="estado-btns">
+          <button class="ebtn ebtn-pending active-estado" onclick="cambiarEstado('ped-2','pending')">Pendiente</button>
+          <button class="ebtn ebtn-prep" onclick="cambiarEstado('ped-2','prep')">En prep.</button>
+          <button class="ebtn ebtn-ready" onclick="cambiarEstado('ped-2','ready')">Listo 🔔</button>
+          <button class="ebtn ebtn-done" onclick="cambiarEstado('ped-2','done')">Entregado ✓</button>
+        </div>
+      </div>
+      <div class="ped-right">
+        <div class="ped-price">$32.480</div>
+        <div class="ped-time">Hace 8 min</div>
+        <button onclick="waConfirmar('Carlos Rojas')" style="margin-top:4px;padding:3px 8px;background:#25D366;color:#fff;border:none;border-radius:12px;font-size:10px;cursor:pointer;">💬 WA</button>
+      </div>
+    </div>
+    <div class="pedido-item" data-status="prep" id="ped-3">
+      <div class="ped-avatar" style="background:#dbeafe;color:#1e40af;">RP</div>
+      <div class="ped-info">
+        <div class="ped-name">Roberto Pérez</div>
+        <div class="ped-detail">Sushi Burger Pollo · Ramen Cerdo · Delivery</div>
+        <span class="badge b-prep" id="badge-ped-3">En preparación</span>
+        <div class="estado-btns">
+          <button class="ebtn ebtn-pending" onclick="cambiarEstado('ped-3','pending')">Pendiente</button>
+          <button class="ebtn ebtn-prep active-estado" onclick="cambiarEstado('ped-3','prep')">En prep.</button>
+          <button class="ebtn ebtn-ready" onclick="cambiarEstado('ped-3','ready')">Listo 🔔</button>
+          <button class="ebtn ebtn-done" onclick="cambiarEstado('ped-3','done')">Entregado ✓</button>
+        </div>
+      </div>
+      <div class="ped-right">
+        <div class="ped-price">$24.470</div>
+        <div class="ped-time">Hace 15 min</div>
+        <button onclick="waConfirmar('Roberto Pérez')" style="margin-top:4px;padding:3px 8px;background:#25D366;color:#fff;border:none;border-radius:12px;font-size:10px;cursor:pointer;">💬 WA</button>
+      </div>
+    </div>
+    <div class="pedido-item" data-status="done" id="ped-4">
+      <div class="ped-avatar" style="background:#d1fae5;color:#065f46;">CL</div>
+      <div class="ped-info">
+        <div class="ped-name">Camila López</div>
+        <div class="ped-detail">Aixa Roll · Golden Roll · Colación Salmón</div>
+        <span class="badge b-done" id="badge-ped-4">Entregado ✓</span>
+        <div class="estado-btns">
+          <button class="ebtn ebtn-pending" onclick="cambiarEstado('ped-4','pending')">Pendiente</button>
+          <button class="ebtn ebtn-prep" onclick="cambiarEstado('ped-4','prep')">En prep.</button>
+          <button class="ebtn ebtn-ready" onclick="cambiarEstado('ped-4','ready')">Listo 🔔</button>
+          <button class="ebtn ebtn-done active-estado" onclick="cambiarEstado('ped-4','done')">Entregado ✓</button>
+        </div>
+      </div>
+      <div class="ped-right">
+        <div class="ped-price">$24.470</div>
+        <div class="ped-time">13:42</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VENTAS ══ -->
+<div id="pane-ventas" class="pane">
+  <div class="stats-grid">
+    <div class="stat green"><div class="stat-label">Este mes</div><div class="stat-value">$2.840.500</div><div class="stat-delta up">↑ +18%</div></div>
+    <div class="stat gold"><div class="stat-label">Esta semana</div><div class="stat-value">$687.430</div><div class="stat-delta up">↑ +8%</div></div>
+    <div class="stat blue"><div class="stat-label">Hoy</div><div class="stat-value">$187.450</div><div class="stat-delta up">↑ +12%</div></div>
+    <div class="stat red"><div class="stat-label">Pedidos mes</div><div class="stat-value">312</div><div class="stat-delta neutral">Meta: 350</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Resumen semanal</span></div>
+    <table class="vtable">
+      <thead><tr><th>Día</th><th>Pedidos</th><th class="num">Ventas</th><th class="num">Ticket prom.</th><th class="num">Variación</th></tr></thead>
+      <tbody>
+        <tr><td>Lunes</td><td>18</td><td class="num">$142.200</td><td class="num">$7.900</td><td class="num pos">↑ +5%</td></tr>
+        <tr><td>Martes</td><td>14</td><td class="num">$108.500</td><td class="num">$7.750</td><td class="num neg">↓ -3%</td></tr>
+        <tr><td>Miércoles</td><td>22</td><td class="num">$178.900</td><td class="num">$8.132</td><td class="num pos">↑ +15%</td></tr>
+        <tr><td>Jueves</td><td>19</td><td class="num">$154.380</td><td class="num">$8.125</td><td class="num pos">↑ +8%</td></tr>
+        <tr><td>Viernes</td><td>28</td><td class="num">$221.200</td><td class="num">$7.900</td><td class="num pos">↑ +22%</td></tr>
+        <tr><td>Sábado</td><td>35</td><td class="num">$294.350</td><td class="num">$8.410</td><td class="num pos">↑ +31%</td></tr>
+        <tr style="font-weight:700;"><td>Domingo</td><td>24</td><td class="num">$187.450</td><td class="num">$7.810</td><td class="num pos">↑ +12%</td></tr>
+      </tbody>
+    </table>
+    <div class="footer-total"><span>Total semana</span><span>$1.287.980</span></div>
+  </div>
+</div>
+
+<!-- ══ CRM CLIENTES ══ -->
+<div id="pane-crm" class="pane">
+  <div class="stats-grid">
+    <div class="stat green"><div class="stat-label">Total clientes</div><div class="stat-value" id="total-cli">0</div></div>
+    <div class="stat gold"><div class="stat-label">VIP</div><div class="stat-value" id="cli-vip">0</div></div>
+    <div class="stat blue"><div class="stat-label">Frecuentes</div><div class="stat-value" id="cli-freq">0</div></div>
+    <div class="stat red"><div class="stat-label">Cumpleaños hoy</div><div class="stat-value" id="cli-cumple">0</div><div class="stat-delta" style="color:#9d174d;">🎂</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-header"><span class="card-title">➕ Nuevo cliente</span></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="cli-nombre" type="text" placeholder="Nombre completo"></div>
+        <div class="form-group"><label class="form-label">Teléfono WA</label><input class="form-input" id="cli-tel" type="tel" placeholder="+56 9 XXXX XXXX"></div>
+        <div class="form-group"><label class="form-label">Fecha de cumpleaños</label><input class="form-input" id="cli-cumpleanos" type="date"></div>
+        <div class="form-group"><label class="form-label">Premio cumpleaños</label>
+          <select class="form-select" id="cli-premio">
+            <option>1 Roll Premium gratis</option>
+            <option>1 Promo Furay 30p 50% off</option>
+            <option>Postre gratis</option>
+            <option>Salsa gratis a elección</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Dirección habitual</label><input class="form-input" id="cli-dir" type="text" placeholder="Dirección delivery"></div>
+        <div class="form-group"><label class="form-label">Preferencias</label><input class="form-input" id="cli-pref" type="text" placeholder="Ej: salsa spicy, sin cebolla"></div>
+        <div class="form-group" style="justify-content:flex-end;"><label class="form-label">&nbsp;</label><button class="btn-primary" onclick="agregarCliente()">Guardar cliente</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Directorio</span>
+      <button onclick="verificarCumpleanos()" class="btn-sm">🎂 Verificar cumpleaños hoy</button>
+    </div>
+    <div id="lista-clientes">
+      <div style="padding:16px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Agrega tu primer cliente arriba</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INSUMOS ══ -->
+<div id="pane-insumos" class="pane">
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-header"><span class="card-title">➕ Nuevo insumo</span></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nombre insumo</label><input class="form-input" id="ins-nombre" type="text" placeholder="Ej: Salmón fresco"></div>
+        <div class="form-group"><label class="form-label">Unidad de medida</label>
+          <select class="form-select" id="ins-unidad">
+            <option value="kg">kg — kilogramos</option>
+            <option value="g">g — gramos</option>
+            <option value="lt">lt — litros</option>
+            <option value="ml">ml — mililitros</option>
+            <option value="un">un — unidades</option>
+            <option value="paq">paq — paquete</option>
+            <option value="lata">lata</option>
+            <option value="caja">caja</option>
+            <option value="bolsa">bolsa</option>
+            <option value="docena">docena</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Stock actual</label><input class="form-input" id="ins-stock" type="number" placeholder="Ej: 5" min="0" step="0.001"></div>
+        <div class="form-group"><label class="form-label">Stock mínimo</label><input class="form-input" id="ins-minimo" type="number" placeholder="Ej: 2" min="0" step="0.001"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Categoría</label>
+          <select class="form-select" id="ins-categoria">
+            <option>Proteínas</option>
+            <option>Verduras y frutas</option>
+            <option>Secos y envasados</option>
+            <option>Lácteos y salsas</option>
+            <option>Bebidas</option>
+            <option>Packaging</option>
+            <option>Otros</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Proveedor habitual</label><input class="form-input" id="ins-proveedor" type="text" placeholder="Nombre proveedor"></div>
+        <div class="form-group" style="justify-content:flex-end;"><label class="form-label">&nbsp;</label><button class="btn-primary" onclick="agregarInsumo()">Agregar insumo</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="card-insumos">
+    <div class="card-header"><span class="card-title">Inventario</span><span style="font-size:11px;color:var(--muted);" id="ins-count">0 insumos</span></div>
+    <div id="lista-insumos"><div style="padding:16px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Agrega tu primer insumo arriba</div></div>
+  </div>
+</div>
+
+<!-- ══ COMPRAS ══ -->
+<div id="pane-compras" class="pane">
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-header"><span class="card-title">➕ Registrar compra</span></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group" style="grid-column:span 2;">
+          <label class="form-label">Insumo</label>
+          <select class="form-select" id="c-insumo" onchange="autoUnidad()">
+            <option value="">Seleccionar insumo...</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Cantidad</label><input class="form-input" type="number" id="c-cantidad" placeholder="Ej: 5" min="0" step="0.001" oninput="previewTotal()"></div>
+        <div class="form-group"><label class="form-label">Unidad</label>
+          <select class="form-select" id="c-unidad">
+            <option value="kg">kg</option><option value="g">g</option><option value="lt">lt</option>
+            <option value="ml">ml</option><option value="un">un</option><option value="paq">paq</option>
+            <option value="lata">lata</option><option value="caja">caja</option><option value="bolsa">bolsa</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Precio unitario ($)</label><input class="form-input" type="number" id="c-precio" placeholder="Ej: 16000" oninput="previewTotal()"></div>
+        <div class="form-group"><label class="form-label">Proveedor</label><input class="form-input" type="text" id="c-proveedor" placeholder="Nombre proveedor"></div>
+        <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" id="c-fecha"></div>
+        <div class="form-group"><label class="form-label">N° Documento</label><input class="form-input" type="text" id="c-boleta" placeholder="Ej: 001234"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tipo documento</label>
+          <select class="form-select" id="c-tipo-doc"><option>Boleta</option><option>Factura</option><option>Sin documento</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">&nbsp;</label>
+          <div id="c-preview" style="display:none;padding:8px 12px;background:#f0faf4;border:1px solid #c8e6c9;border-radius:8px;font-family:'Cinzel',serif;font-size:13px;color:#1b5e20;font-weight:700;"></div>
+        </div>
+        <div class="form-group" style="justify-content:flex-end;"><label class="form-label">&nbsp;</label><button class="btn-primary" onclick="registrarCompra()">Registrar compra</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat green"><div class="stat-label">Total compras mes</div><div class="stat-value" id="tc-mes">$0</div></div>
+    <div class="stat gold"><div class="stat-label">Compras semana</div><div class="stat-value" id="tc-sem">$0</div></div>
+    <div class="stat blue"><div class="stat-label">N° compras</div><div class="stat-value" id="tc-num">0</div></div>
+    <div class="stat red"><div class="stat-label">Mayor gasto</div><div class="stat-value" id="tc-mayor" style="font-size:14px;">—</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Historial</span>
+      <button onclick="exportarCSV()" class="btn-sm">Exportar CSV</button>
+    </div>
+    <div id="historial-compras"><div style="padding:16px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Las compras registradas aparecerán aquí</div></div>
+  </div>
+</div>
+
+<!-- ══ CARTA EDITOR ══ -->
+<div id="pane-carta" class="pane">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <div style="font-size:12px;color:var(--muted);">Activa, desactiva o edita cada plato sin tocar código</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:12px;color:var(--muted);">Local:</span>
+      <div class="toggle on" id="localToggle" onclick="toggleLocal()"></div>
+      <span style="font-size:12px;font-weight:700;" id="localLabel" style="color:var(--success);">Abierto</span>
+    </div>
+  </div>
+
+  <div id="carta-container"></div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-header"><span class="card-title">➕ Agregar nuevo plato</span></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nombre del plato</label><input class="form-input" id="nuevo-plato" type="text" placeholder="Ej: Sushi Burger Veggie"></div>
+        <div class="form-group"><label class="form-label">Precio ($)</label><input class="form-input" id="nuevo-precio" type="number" placeholder="Ej: 7990"></div>
+        <div class="form-group"><label class="form-label">Categoría</label>
+          <select class="form-select" id="nuevo-cat">
+            <option>Combos</option><option>Rolls Clásicos</option><option>Rolls Especiales</option>
+            <option>Gohan</option><option>Ceviches</option><option>Sushi Burger</option>
+            <option>Pollo Frito</option><option>Ramen y Platos</option><option>Salsas</option><option>Bebidas</option>
+          </select>
+        </div>
+        <div class="form-group" style="justify-content:flex-end;"><label class="form-label">&nbsp;</label><button class="btn-primary" onclick="agregarPlato()">Agregar plato</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CAJA LOCAL ══ -->
+<div id="pane-caja" class="pane">
+
+  <!-- INFO PAGO -->
+  <div class="alerta info" style="margin-bottom:14px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Transferencia%20Sushi%20Aixa%20SPA%0ARUT:%2078.322.412-7%0ABanco%20BCI%0ACta%20Cte:%20231148541%0AEmail:%20sushi.aixa@gmail.com" style="width:100px;height:100px;" alt="QR Transferencia Sushi Aixa">
+    </div>
+    <div>
+      <div style="font-weight:700;margin-bottom:4px;">💳 Datos para transferencia:</div>
+      <div>Sushi Aixa SPA · RUT <strong>78.322.412-7</strong></div>
+      <div>Banco BCI · Cta. Cte. <strong>231148541</strong></div>
+      <div>sushi.aixa@gmail.com</div>
+    </div>
+  </div>
+
+  <!-- NUEVO PEDIDO LOCAL -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-header"><span class="card-title">➕ Nuevo pedido en local</span></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nombre cliente</label>
+          <input class="form-input" id="caja-nombre" type="text" placeholder="Nombre o mesa">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Método de pago</label>
+          <select class="form-select" id="caja-pago">
+            <option value="efectivo">💵 Efectivo</option>
+            <option value="transferencia">📲 Transferencia</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monto recibido ($)</label>
+          <input class="form-input" type="number" id="caja-monto" placeholder="Ej: 15000" oninput="calcVuelto()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total del pedido ($)</label>
+          <input class="form-input" type="number" id="caja-total" placeholder="Ej: 11990" oninput="calcVuelto()">
+        </div>
+      </div>
+
+      <!-- Selector de platos -->
+      <div class="form-group" style="margin-bottom:10px;">
+        <label class="form-label">Agregar platos al pedido</label>
+        <div style="display:flex;gap:6px;">
+          <select class="form-select" id="caja-plato-sel" style="flex:1;">
+            <option value="">Seleccionar plato...</option>
+          </select>
+          <button onclick="agregarPlatoACaja()" class="btn-primary" style="padding:8px 14px;">+</button>
+        </div>
+      </div>
+      <div id="caja-items" style="margin-bottom:10px;display:none;">
+        <div class="card-header" style="padding:8px 12px;"><span class="card-title">Ítems del pedido</span><span id="caja-subtotal" style="font-family:'Cinzel',serif;font-weight:700;color:var(--g);">$0</span></div>
+        <div id="caja-items-list"></div>
+      </div>
+
+      <!-- Vuelto -->
+      <div id="caja-vuelto-wrap" style="display:none;padding:10px 14px;background:#f0faf4;border:1px solid #c8e6c9;border-radius:8px;margin-bottom:10px;">
+        <span style="font-size:13px;color:#1b5e20;font-weight:700;">Vuelto: <span id="caja-vuelto">$0</span></span>
+      </div>
+
+      <!-- Transferencia info con QR -->
+      <div id="caja-transfer-info" style="display:none;padding:14px;background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Transferencia%20Sushi%20Aixa%20SPA%0ARUT:%2078.322.412-7%0ABanco%20BCI%0ACta%20Cte:%20231148541%0AEmail:%20sushi.aixa@gmail.com" style="width:160px;height:160px;" alt="QR Transferencia Sushi Aixa">
+            <div style="font-size:10px;color:#1e40af;margin-top:4px;font-weight:700;">Escanear para transferir</div>
+          </div>
+          <div style="font-size:12px;color:#1e40af;line-height:2;">
+            <div>📲 <strong>Transferencia Sushi Aixa SPA</strong></div>
+            <div>RUT: <strong>78.322.412-7</strong></div>
+            <div>Banco BCI · Cta. Cte.</div>
+            <div><strong>231148541</strong></div>
+            <div>sushi.aixa@gmail.com</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="registrarPedidoLocal()" style="width:100%;">Registrar pedido en local</button>
+    </div>
+  </div>
+
+  <!-- STATS CAJA -->
+  <div class="stats-grid">
+    <div class="stat green"><div class="stat-label">Ventas hoy (local)</div><div class="stat-value" id="caja-total-dia">$0</div></div>
+    <div class="stat gold"><div class="stat-label">Efectivo</div><div class="stat-value" id="caja-efectivo">$0</div></div>
+    <div class="stat blue"><div class="stat-label">Transferencias</div><div class="stat-value" id="caja-transf">$0</div></div>
+    <div class="stat red"><div class="stat-label">Pedidos hoy</div><div class="stat-value" id="caja-num">0</div></div>
+  </div>
+
+  <!-- HISTORIAL CAJA -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Ventas del día</span>
+      <button onclick="cierreCaja()" class="btn-sm">Cierre de caja</button>
+    </div>
+    <div id="caja-historial"><div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Los pedidos registrados aparecerán aquí</div></div>
+  </div>
+</div>
+
+<!-- ══ CONTABILIDAD ══ -->
+<div id="pane-contabilidad" class="pane">
+
+  <div class="nav-tabs" style="position:static;margin-bottom:14px;border-radius:10px;overflow:hidden;">
+    <button class="tab active" onclick="showContTab('f29',this)" style="font-size:9px;">📋 F29 IVA</button>
+    <button class="tab" onclick="showContTab('libros',this)" style="font-size:9px;">📖 Libros</button>
+    <button class="tab" onclick="showContTab('remuneraciones',this)" style="font-size:9px;">👷 Remuneraciones</button>
+    <button class="tab" onclick="showContTab('flujo',this)" style="font-size:9px;">💸 Flujo Caja</button>
+    <button class="tab" onclick="showContTab('resultados',this)" style="font-size:9px;">📊 P&L</button>
+    <button class="tab" onclick="showContTab('activos',this)" style="font-size:9px;">🏭 Activos</button>
+    <button class="tab" onclick="showContTab('gastos',this)" style="font-size:9px;">🧾 Gastos Fijos</button>
+    <button class="tab" onclick="showContTab('mutuo',this)" style="font-size:9px;">🏦 Mutuo</button>
+    <button class="tab" onclick="showContTab('contador',this)" style="font-size:9px;">📤 Contador</button>
+  </div>
+
+  <!-- F29 -->
+  <div id="cont-f29" class="cont-pane">
+    <div class="alerta warn">⚠️ &nbsp;<strong>Plazo:</strong> día 12 de cada mes. Multa por atraso: 1.5% del impuesto + 1.5% por mes.</div>
+    <div class="cont-section">
+      <div class="cont-title">IVA Débito (Ventas del mes) <span class="cont-badge" style="background:#dbeafe;color:#1e40af;">19%</span></div>
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div class="iva-row"><span>Ventas netas (sin IVA)</span><span id="f29-neto" style="font-weight:700;">$0</span></div>
+        <div class="iva-row"><span>IVA débito (19%)</span><span id="f29-debito" style="font-weight:700;color:var(--danger);">$0</span></div>
+      </div>
+    </div>
+    <div class="cont-section">
+      <div class="cont-title">IVA Crédito (Compras con factura del mes) <span class="cont-badge" style="background:#d1fae5;color:#065f46;">Recuperable</span></div>
+      <div id="f29-facturas-list"><div style="font-size:12px;color:var(--muted);font-style:italic;">Registra compras con factura en el módulo Compras para ver el crédito acá</div></div>
+      <div class="iva-row" style="margin-top:8px;"><span>Total IVA crédito</span><span id="f29-credito" style="font-weight:700;color:var(--success);">$0</span></div>
+    </div>
+    <div class="cont-section" style="background:#faf8f4;">
+      <div class="iva-row total"><span>IVA a pagar al SII</span><span id="f29-pagar" style="color:var(--danger);">$0</span></div>
+      <div class="iva-row" style="margin-top:8px;"><span>PPM (1% ventas netas)</span><span id="f29-ppm" style="font-weight:700;">$0</span></div>
+      <div class="iva-row total" style="margin-top:4px;"><span>Total a declarar F29</span><span id="f29-total" style="color:var(--danger);">$0</span></div>
+    </div>
+    <button class="btn-primary" style="margin-top:10px;width:100%;" onclick="calcularF29()">Recalcular F29</button>
+  </div>
+
+  <!-- LIBROS -->
+  <div id="cont-libros" class="cont-pane" style="display:none;">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">📗 Libro de Ventas</span><button class="btn-sm" onclick="exportarLibroVentas()">Exportar CSV</button></div>
+        <table class="vtable">
+          <thead><tr><th>Fecha</th><th>Documento</th><th class="num">Neto</th><th class="num">IVA</th><th class="num">Total</th></tr></thead>
+          <tbody id="libro-ventas-body">
+            <tr><td>17/05</td><td>Boleta #1234</td><td class="num">$15.756</td><td class="num">$2.994</td><td class="num">$18.750</td></tr>
+            <tr><td>17/05</td><td>Boleta #1235</td><td class="num">$20.168</td><td class="num">$3.832</td><td class="num">$24.000</td></tr>
+            <tr><td>16/05</td><td>Boleta #1230</td><td class="num">$11.765</td><td class="num">$2.235</td><td class="num">$14.000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">📘 Libro de Compras</span><button class="btn-sm" onclick="exportarLibroCompras()">Exportar CSV</button></div>
+        <table class="vtable">
+          <thead><tr><th>Fecha</th><th>Proveedor</th><th>Doc.</th><th class="num">Neto</th><th class="num">IVA</th></tr></thead>
+          <tbody id="libro-compras-body"><tr><td colspan="5" style="text-align:center;color:var(--muted);font-style:italic;font-size:11px;padding:12px;">Registra compras con factura para verlas acá</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REMUNERACIONES -->
+  <div id="cont-remuneraciones" class="cont-pane" style="display:none;">
+    <div class="alerta warn">⚠️ &nbsp;<strong>Plazo cotizaciones:</strong> día 10 de cada mes en PreviRed.</div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><span class="card-title">➕ Agregar trabajador</span></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="rem-nombre" type="text" placeholder="Nombre completo"></div>
+          <div class="form-group"><label class="form-label">RUT</label><input class="form-input" id="rem-rut" type="text" placeholder="12.345.678-9"></div>
+          <div class="form-group"><label class="form-label">Sueldo bruto ($)</label><input class="form-input" id="rem-sueldo" type="number" placeholder="Ej: 500000" oninput="calcLiquidacion()"></div>
+          <div class="form-group"><label class="form-label">AFP</label>
+            <select class="form-select" id="rem-afp">
+              <option value="0.1057">Capital (10.57%)</option>
+              <option value="0.1027">Cuprum (10.27%)</option>
+              <option value="0.1069">Habitat (10.69%)</option>
+              <option value="0.1058">PlanVital (10.58%)</option>
+              <option value="0.1058">ProVida (10.58%)</option>
+              <option value="0.10">Uno (10.00%)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Previsión salud</label>
+            <select class="form-select" id="rem-salud">
+              <option value="0.07">Fonasa (7%)</option>
+              <option value="0.07">Isapre (7% base)</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Cargo</label><input class="form-input" id="rem-cargo" type="text" placeholder="Ej: Cocinero"></div>
+          <div class="form-group" style="justify-content:flex-end;"><label class="form-label">&nbsp;</label><button class="btn-primary" onclick="agregarTrabajador()">Agregar</button></div>
+        </div>
+        <div id="liquidacion-preview" style="display:none;margin-top:10px;background:#faf8f4;border:1px solid var(--border);border-radius:8px;padding:12px;">
+          <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;margin-bottom:8px;color:var(--text);">PREVIEW LIQUIDACIÓN</div>
+          <div id="liq-detalle" style="font-size:12px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Nómina</span><button class="btn-sm" onclick="exportarNomina()">Exportar CSV</button></div>
+      <div id="lista-trabajadores"><div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Agrega trabajadores arriba</div></div>
+    </div>
+  </div>
+
+  <!-- FLUJO DE CAJA -->
+  <div id="cont-flujo" class="cont-pane" style="display:none;">
+    <div class="stats-grid">
+      <div class="stat green"><div class="stat-label">Saldo inicial mes</div><div class="stat-value">$450.000</div></div>
+      <div class="stat gold"><div class="stat-label">Ingresos proyectados</div><div class="stat-value">$2.840.500</div></div>
+      <div class="stat blue"><div class="stat-label">Egresos proyectados</div><div class="stat-value">$1.980.300</div></div>
+      <div class="stat red"><div class="stat-label">Saldo final proyectado</div><div class="stat-value" style="color:var(--success);">$1.310.200</div></div>
+    </div>
+    <div class="cont-section">
+      <div class="cont-title">Ingresos del mes</div>
+      <div class="iva-row"><span>Ventas (pedidos WhatsApp)</span><span style="font-weight:700;">$2.840.500</span></div>
+    </div>
+    <div class="cont-section">
+      <div class="cont-title">Egresos del mes</div>
+      <div class="iva-row"><span>Insumos y materias primas</span><span style="font-weight:700;">$1.120.300</span></div>
+      <div class="iva-row"><span>Remuneraciones</span><span style="font-weight:700;" id="flujo-rem">$0</span></div>
+      <div class="iva-row"><span>Arriendo local</span><span style="font-weight:700;">$900.000</span></div>
+      <div class="iva-row"><span>Cuota mutuo (capital)</span><span style="font-weight:700;">$850.000</span></div>
+      <div class="iva-row"><span>Intereses mutuo (18% anual (TMC) anual ÷ 12)</span><span style="font-weight:700;" id="flujo-interes">$300.000</span></div>
+      <div class="iva-row"><span>Servicios básicos (luz, agua, gas)</span><span style="font-weight:700;">$85.000</span></div>
+      <div class="iva-row"><span>IVA F29</span><span style="font-weight:700;" id="flujo-iva">$0</span></div>
+      <div class="iva-row"><span>Gastos varios</span><span style="font-weight:700;">$45.000</span></div>
+    </div>
+  </div>
+
+  <!-- P&L -->
+  <div id="cont-resultados" class="cont-pane" style="display:none;">
+    <div class="cont-section">
+      <div class="cont-title">Estado de Resultados — Mayo 2026</div>
+      <div class="iva-row"><span>+ Ingresos por ventas</span><span style="font-weight:700;color:var(--success);">$2.840.500</span></div>
+      <div class="iva-row"><span>− Costo de ventas (insumos)</span><span style="font-weight:700;color:var(--danger);">$1.120.300</span></div>
+      <div class="iva-row total"><span>= Utilidad bruta</span><span style="color:var(--success);">$1.720.200</span></div>
+      <div style="height:8px;"></div>
+      <div class="iva-row"><span>− Remuneraciones</span><span style="font-weight:700;color:var(--danger);" id="pl-rem">$0</span></div>
+      <div class="iva-row"><span>− Arriendo local</span><span style="font-weight:700;color:var(--danger);">$900.000</span></div>
+      <div class="iva-row"><span>− Cuota mutuo (capital)</span><span style="font-weight:700;color:var(--danger);">$850.000</span></div>
+      <div class="iva-row"><span>− Intereses mutuo (18% anual (TMC) anual)</span><span style="font-weight:700;color:var(--danger);" id="pl-interes">$300.000</span></div>
+      <div class="iva-row"><span>− Servicios básicos</span><span style="font-weight:700;color:var(--danger);">$85.000</span></div>
+      <div class="iva-row"><span>− Gastos operacionales</span><span style="font-weight:700;color:var(--danger);">$45.000</span></div>
+      <div class="iva-row total"><span>= Utilidad operacional</span><span id="pl-utilidad" style="color:var(--success);">$0</span></div>
+      <div style="height:8px;"></div>
+      <div class="iva-row"><span>− IVA a pagar (F29)</span><span style="font-weight:700;color:var(--danger);" id="pl-iva">$0</span></div>
+      <div class="iva-row"><span>− PPM renta</span><span style="font-weight:700;color:var(--danger);" id="pl-ppm">$0</span></div>
+      <div class="iva-row total" style="font-size:15px;"><span>= UTILIDAD NETA</span><span id="pl-neta" style="color:var(--success);">$1.240.200</span></div>
+    </div>
+  </div>
+
+  <!-- ACTIVOS FIJOS -->
+  <div id="cont-activos" class="cont-pane" style="display:none;">
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><span class="card-title">➕ Agregar activo</span></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nombre activo</label><input class="form-input" id="act-nombre" type="text" placeholder="Ej: Refrigerador Sushi"></div>
+          <div class="form-group"><label class="form-label">Valor ($)</label><input class="form-input" id="act-valor" type="number" placeholder="Ej: 800000"></div>
+          <div class="form-group"><label class="form-label">Vida útil (años)</label><input class="form-input" id="act-vida" type="number" placeholder="Ej: 7" min="1"></div>
+          <div class="form-group"><label class="form-label">Fecha compra</label><input class="form-input" id="act-fecha" type="date"></div>
+        </div>
+        <button class="btn-primary" onclick="agregarActivo()">Agregar activo</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Registro de activos fijos</span></div>
+      <div id="lista-activos"><div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Agrega activos arriba para calcular depreciación</div></div>
+    </div>
+  </div>
+
+  <!-- GASTOS FIJOS -->
+  <div id="cont-gastos" class="cont-pane" style="display:none;">
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><span class="card-title">➕ Agregar gasto fijo</span></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Descripción</label><input class="form-input" id="gf-nombre" type="text" placeholder="Ej: Arriendo local"></div>
+          <div class="form-group"><label class="form-label">Monto mensual ($)</label><input class="form-input" id="gf-monto" type="number" placeholder="Ej: 900000"></div>
+          <div class="form-group"><label class="form-label">Categoría</label>
+            <select class="form-select" id="gf-cat">
+              <option>Arriendo</option><option>Servicios básicos</option><option>Internet/Telefonía</option>
+              <option>Seguros</option><option>Marketing</option><option>Contabilidad</option><option>Otros</option>
+            </select>
+          </div>
+          <div class="form-group" style="justify-content:flex-end;"><label class="form-label">&nbsp;</label><button class="btn-primary" onclick="agregarGastoFijo()">Agregar</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Gastos fijos mensuales</span><span class="card-title" id="total-gf">Total: $0</span></div>
+      <div id="lista-gf"><div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Agrega gastos fijos arriba</div></div>
+    </div>
+  </div>
+
+  <!-- TABLA AMORTIZACIÓN MUTUO -->
+  <div id="cont-mutuo" class="cont-pane" style="display:none;">
+    <div class="alerta info">📋 &nbsp;Mutuo $20.000.000 · Tasa 18% anual (TMC) · Cuota capital $850.000/mes · Cuota total aprox. $1.150.000/mes el primer mes</div>
+    <div class="stats-grid" style="margin-bottom:14px;">
+      <div class="stat green"><div class="stat-label">Capital inicial</div><div class="stat-value">$20.000.000</div></div>
+      <div class="stat gold"><div class="stat-label">Tasa anual</div><div class="stat-value">18%</div><div class="stat-delta neutral">TMC vigente</div></div>
+      <div class="stat blue"><div class="stat-label">Cuota capital</div><div class="stat-value">$850.000</div><div class="stat-delta neutral">mensual fija</div></div>
+      <div class="stat red"><div class="stat-label">Interés mes 1</div><div class="stat-value">$300.000</div><div class="stat-delta neutral">decrece c/mes</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Tabla de amortización</span><button class="btn-sm" onclick="exportarAmortizacion()">Exportar CSV</button></div>
+      <table class="vtable">
+        <thead><tr><th>Mes</th><th class="num">Saldo inicial</th><th class="num">Capital</th><th class="num">Interés</th><th class="num">Cuota total</th><th class="num">Saldo final</th></tr></thead>
+        <tbody><tr><td>Ene 2026</td><td class="num">$20.000.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$300.000</td><td class="num" style="font-weight:700;">$1.150.000</td><td class="num" style="color:var(--success);">$19.150.000</td></tr><tr><td>Feb 2026</td><td class="num">$19.150.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$287.250</td><td class="num" style="font-weight:700;">$1.137.250</td><td class="num" style="color:var(--success);">$18.300.000</td></tr><tr><td>Mar 2026</td><td class="num">$18.300.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$274.500</td><td class="num" style="font-weight:700;">$1.124.500</td><td class="num" style="color:var(--success);">$17.450.000</td></tr><tr><td>Abr 2026</td><td class="num">$17.450.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$261.750</td><td class="num" style="font-weight:700;">$1.111.750</td><td class="num" style="color:var(--success);">$16.600.000</td></tr><tr><td>May 2026</td><td class="num">$16.600.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$249.000</td><td class="num" style="font-weight:700;">$1.099.000</td><td class="num" style="color:var(--success);">$15.750.000</td></tr><tr><td>Jun 2026</td><td class="num">$15.750.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$236.250</td><td class="num" style="font-weight:700;">$1.086.250</td><td class="num" style="color:var(--success);">$14.900.000</td></tr><tr><td>Jul 2026</td><td class="num">$14.900.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$223.500</td><td class="num" style="font-weight:700;">$1.073.500</td><td class="num" style="color:var(--success);">$14.050.000</td></tr><tr><td>Ago 2027</td><td class="num">$14.050.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$210.750</td><td class="num" style="font-weight:700;">$1.060.750</td><td class="num" style="color:var(--success);">$13.200.000</td></tr><tr><td>Sep 2027</td><td class="num">$13.200.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$198.000</td><td class="num" style="font-weight:700;">$1.048.000</td><td class="num" style="color:var(--success);">$12.350.000</td></tr><tr><td>Oct 2027</td><td class="num">$12.350.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$185.250</td><td class="num" style="font-weight:700;">$1.035.250</td><td class="num" style="color:var(--success);">$11.500.000</td></tr><tr><td>Nov 2027</td><td class="num">$11.500.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$172.500</td><td class="num" style="font-weight:700;">$1.022.500</td><td class="num" style="color:var(--success);">$10.650.000</td></tr><tr><td>Dic 2027</td><td class="num">$10.650.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$159.750</td><td class="num" style="font-weight:700;">$1.009.750</td><td class="num" style="color:var(--success);">$9.800.000</td></tr><tr><td>Ene 2027</td><td class="num">$9.800.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$147.000</td><td class="num" style="font-weight:700;">$997.000</td><td class="num" style="color:var(--success);">$8.950.000</td></tr><tr><td>Feb 2027</td><td class="num">$8.950.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$134.250</td><td class="num" style="font-weight:700;">$984.250</td><td class="num" style="color:var(--success);">$8.100.000</td></tr><tr><td>Mar 2027</td><td class="num">$8.100.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$121.500</td><td class="num" style="font-weight:700;">$971.500</td><td class="num" style="color:var(--success);">$7.250.000</td></tr><tr><td>Abr 2027</td><td class="num">$7.250.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$108.750</td><td class="num" style="font-weight:700;">$958.750</td><td class="num" style="color:var(--success);">$6.400.000</td></tr><tr><td>May 2027</td><td class="num">$6.400.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$96.000</td><td class="num" style="font-weight:700;">$946.000</td><td class="num" style="color:var(--success);">$5.550.000</td></tr><tr><td>Jun 2027</td><td class="num">$5.550.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$83.250</td><td class="num" style="font-weight:700;">$933.250</td><td class="num" style="color:var(--success);">$4.700.000</td></tr><tr><td>Jul 2027</td><td class="num">$4.700.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$70.500</td><td class="num" style="font-weight:700;">$920.500</td><td class="num" style="color:var(--success);">$3.850.000</td></tr><tr><td>Ago 2028</td><td class="num">$3.850.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$57.750</td><td class="num" style="font-weight:700;">$907.750</td><td class="num" style="color:var(--success);">$3.000.000</td></tr><tr><td>Sep 2028</td><td class="num">$3.000.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$45.000</td><td class="num" style="font-weight:700;">$895.000</td><td class="num" style="color:var(--success);">$2.150.000</td></tr><tr><td>Oct 2028</td><td class="num">$2.150.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$32.250</td><td class="num" style="font-weight:700;">$882.250</td><td class="num" style="color:var(--success);">$1.300.000</td></tr><tr><td>Nov 2028</td><td class="num">$1.300.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$19.500</td><td class="num" style="font-weight:700;">$869.500</td><td class="num" style="color:var(--success);">$450.000</td></tr><tr><td>Dic 2028</td><td class="num">$450.000</td><td class="num">$850.000</td><td class="num" style="color:var(--danger);">$6.750</td><td class="num" style="font-weight:700;">$856.750</td><td class="num" style="color:var(--success);">$0</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INFORME CONTADOR -->
+  <div id="cont-contador" class="cont-pane" style="display:none;">
+    <div class="alerta info">📤 &nbsp;Este informe resume todo lo que necesita tu contador para declarar el F29 y llevar la contabilidad mensual.</div>
+    <div class="cont-section">
+      <div class="cont-title">Informe mensual — Mayo 2026</div>
+      <div class="iva-row"><span>Ventas totales</span><span style="font-weight:700;">$2.840.500</span></div>
+      <div class="iva-row"><span>N° boletas emitidas</span><span style="font-weight:700;">312</span></div>
+      <div class="iva-row"><span>Compras con factura (IVA crédito)</span><span style="font-weight:700;" id="inf-credito">$0</span></div>
+      <div class="iva-row"><span>Remuneraciones pagadas</span><span style="font-weight:700;" id="inf-rem">$0</span></div>
+      <div class="iva-row"><span>IVA a pagar (F29)</span><span style="font-weight:700;color:var(--danger);" id="inf-iva">$0</span></div>
+      <div class="iva-row"><span>PPM</span><span style="font-weight:700;" id="inf-ppm">$0</span></div>
+      <div class="iva-row total"><span>Utilidad neta estimada</span><span id="inf-utilidad" style="color:var(--success);">$0</span></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+      <button class="btn-primary" onclick="exportarInformeContador()">Exportar PDF/CSV para contador</button>
+      <button class="btn-sm" onclick="calcularF29();actualizarInforme();">Recalcular todo</button>
+    </div>
+  </div>
+
+</div><!-- /contabilidad -->
+
+</div><!-- /main -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE GLOBAL
+// ═══════════════════════════════════════════════════════
+var insumos = [];
+var compras = [];
+var clientes = [];
+var trabajadores = [];
+var activos = [];
+var gastosFijos = [];
+var platos = {
+  'Combos':['Promo Furay 30p|$11.990','Promo Aixa Premium 40p|$19.990','Promo Premium 60p|$24.990','Promo Family 90p|$34.990','Promo Veggie 40p|$14.990'],
+  'Rolls Clásicos':['Roll Salmón Palta|$5.990','Roll Camarón Panko|$5.990','Roll Pollo Teriyaki|$5.490','Roll Palmito Palta|$4.990','Hosomaki Palta|$3.990'],
+  'Rolls Especiales':['Aixa Roll|$7.990','Sakura Roll|$7.490','Fuego Roll|$7.490','Golden Roll|$8.490'],
+  'Gohan':['Gohan Salmón|$6.490','Gohan Pollo|$5.990','Gohan Camarón|$6.490','Gohan Mixto|$7.490'],
+  'Ceviches':['Ceviche Aixa Salmón|$7.490','Ceviche AIXA Mixto|$7.990'],
+  'Sushi Burger':['Sushi Burger Pollo|$7.990','Sushi Burger Camarón|$7.990'],
+  'Pollo Frito':['Pollo Frito Picante|$5.990','Pollo Frito Dulce|$5.990'],
+  'Ramen y Platos':['Ramen de Pollo|$8.990','Ramen de Cerdo|$8.990','Colación Pollo Frito|$7.990','Colación Salmón Sellado|$8.490','Colación Cerdo Tonkatsu|$7.990'],
+  'Salsas':['Salsa Jalapeño|$1.000','Salsa Spicy|$1.000','Salsa Mango|$1.000','Salsa Teriyaki|$1.000','Salsa Huancaína|$1.000'],
+  'Bebidas':['Té Verde|$1.500','Agua Mineral|$1.200','Bebida en Lata|$1.300']
+};
+var platosActivos = {};
+var localAbierto = true;
+var WA = "56965162439";
+
+// ═══════════════════════════════════════════════════════
+// RELOJ
+// ═══════════════════════════════════════════════════════
+function tick(){
+  var d=new Date();
+  document.getElementById('clock').textContent=
+    String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+setInterval(tick,1000); tick();
+
+// ═══════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════
+function showTab(id,btn){
+  document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-tabs .tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('pane-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+function showContTab(id,btn){
+  document.querySelectorAll('.cont-pane').forEach(function(p){p.style.display='none';});
+  document.querySelectorAll('.nav-tabs .tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('cont-'+id).style.display='block';
+  btn.classList.add('active');
+  if(id==='f29') calcularF29();
+  if(id==='contador') actualizarInforme();
+}
+
+// ═══════════════════════════════════════════════════════
+// LOCAL TOGGLE
+// ═══════════════════════════════════════════════════════
+function toggleLocal(){
+  localAbierto=!localAbierto;
+  var d=document.getElementById('statusDot');
+  var t=document.getElementById('statusText');
+  var tog=document.getElementById('localToggle');
+  var lbl=document.getElementById('localLabel');
+  d.style.background=localAbierto?'#22c55e':'#ef4444';
+  t.textContent=localAbierto?'Abierto':'Cerrado';
+  t.style.color=localAbierto?'#22c55e':'#ef4444';
+  if(tog){tog.className='toggle '+(localAbierto?'on':'off');}
+  if(lbl){lbl.textContent=localAbierto?'Abierto':'Cerrado';lbl.style.color=localAbierto?'var(--success)':'var(--danger)';}
+}
+
+// ═══════════════════════════════════════════════════════
+// PEDIDOS — ESTADOS
+// ═══════════════════════════════════════════════════════
+function cambiarEstado(pedId, estado){
+  var item=document.getElementById(pedId);
+  if(!item) return;
+  item.dataset.status=estado;
+  var badge=item.querySelector('.badge');
+  var labels={pending:'Pendiente',prep:'En preparación',ready:'Listo para entregar 🔔',done:'Entregado ✓'};
+  var classes={pending:'b-pending',prep:'b-prep',ready:'b-ready',done:'b-done'};
+  badge.className='badge '+classes[estado];
+  badge.textContent=labels[estado];
+  item.querySelectorAll('.ebtn').forEach(function(b){b.classList.remove('active-estado');});
+  var activeBtn=item.querySelector('.ebtn-'+estado);
+  if(activeBtn) activeBtn.classList.add('active-estado');
+  if(estado==='ready'){
+    var name=item.querySelector('.ped-name').textContent;
+    waListo(name);
+  }
+}
+function filtrarP(status){
+  document.querySelectorAll('.pedido-item').forEach(function(i){
+    i.style.display=(status==='todos'||i.dataset.status===status)?'flex':'none';
+  });
+}
+function waConfirmar(nombre){
+  var msg="Hola "+nombre+"! Confirmamos tu pedido en Sushi Aixa. Estamos preparándolo, tiempo estimado 20 minutos. ¡Gracias por elegirnos! 🌸";
+  window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(msg),"_blank");
+}
+function waListo(nombre){
+  var msg="¡Hola "+nombre+"! 🌸 Tu pedido de Sushi Aixa está LISTO. Puedes pasar a retirarlo o el repartidor está en camino. ¡Gracias!";
+  window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(msg),"_blank");
+}
+
+// ═══════════════════════════════════════════════════════
+// CRM CLIENTES
+// ═══════════════════════════════════════════════════════
+function agregarCliente(){
+  var nombre=document.getElementById('cli-nombre').value.trim();
+  var tel=document.getElementById('cli-tel').value.trim();
+  var cumple=document.getElementById('cli-cumpleanos').value;
+  var premio=document.getElementById('cli-premio').value;
+  var dir=document.getElementById('cli-dir').value.trim();
+  var pref=document.getElementById('cli-pref').value.trim();
+  if(!nombre||!tel){alert('Ingresa al menos nombre y teléfono');return;}
+  var newCli = {nombre,tel,cumple,premio,dir,pref,pedidos:0,ltv:0};
+  clientes.push(newCli);
+  renderClientes();
+  guardarCliente(newCli);
+  document.getElementById('cli-nombre').value='';
+  document.getElementById('cli-tel').value='';
+  document.getElementById('cli-cumpleanos').value='';
+  document.getElementById('cli-dir').value='';
+  document.getElementById('cli-pref').value='';
+}
+function renderClientes(){
+  var cont=document.getElementById('lista-clientes');
+  document.getElementById('total-cli').textContent=clientes.length;
+  if(clientes.length===0){cont.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Agrega tu primer cliente arriba</div>';return;}
+  cont.innerHTML=clientes.map(function(c,i){
+    var ini=c.nombre.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+    var hoy=new Date(); var cumpleStr='';
+    if(c.cumple){
+      var d=new Date(c.cumple+'T12:00:00');
+      cumpleStr='🎂 '+d.toLocaleDateString('es-CL',{day:'numeric',month:'long'});
+      if(d.getMonth()===hoy.getMonth()&&d.getDate()===hoy.getDate()) cumpleStr='🎂 ¡HOY!';
+    }
+    return '<div class="cli-card">'
+      +'<div class="cli-av" style="background:#fef3c7;color:#92400e;">'+ini+'</div>'
+      +'<div class="cli-info">'
+        +'<div class="cli-name">'+c.nombre+'</div>'
+        +'<div class="cli-meta">'+c.tel+(c.dir?' · '+c.dir:'')+'</div>'
+        +(c.pref?'<div class="cli-meta" style="margin-top:2px;">Preferencias: '+c.pref+'</div>':'')
+        +(cumpleStr?'<div class="cli-meta" style="color:#9d174d;margin-top:2px;">'+cumpleStr+(c.premio?' · Premio: '+c.premio:'')+'</div>':'')
+      +'</div>'
+      +'<div class="cli-right">'
+        +'<div style="display:flex;flex-direction:column;gap:4px;">'
+          +'<button onclick="waCumpleanos('+i+')" class="btn-sm" style="font-size:9px;">🎂 WA cumple</button>'
+          +'<button onclick="eliminarCliente('+i+')" class="btn-danger-sm" style="font-size:9px;">Eliminar</button>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+function eliminarCliente(i){
+  if(confirm('¿Eliminar cliente '+clientes[i].nombre+'?')){clientes.splice(i,1);renderClientes();}
+}
+function verificarCumpleanos(){
+  var hoy=new Date();
+  var cumplenieros=clientes.filter(function(c){
+    if(!c.cumple) return false;
+    var d=new Date(c.cumple+'T12:00:00');
+    return d.getMonth()===hoy.getMonth()&&d.getDate()===hoy.getDate();
+  });
+  document.getElementById('cli-cumple').textContent=cumplenieros.length;
+  if(cumplenieros.length>0){
+    var nombres=cumplenieros.map(function(c){return c.nombre;}).join(', ');
+    var alerta=document.getElementById('cumple-alert');
+    document.getElementById('cumple-alert-text').textContent='¡Hoy es el cumpleaños de: '+nombres+'! Recuerda enviarles su regalo.';
+    alerta.style.display='flex';
+    cumplenieros.forEach(function(c,i){
+      setTimeout(function(){waCumpleanos(clientes.indexOf(c));},i*500);
+    });
+  } else {
+    alert('No hay cumpleaños hoy 🎂');
+  }
+}
+function waCumpleanos(i){
+  var c=clientes[i];
+  if(!c) return;
+  var num=c.tel.replace(/[^0-9]/g,'');
+  if(!num){alert('Este cliente no tiene teléfono registrado');return;}
+  var msg="¡Hola "+c.nombre+"! 🎂🌸\n\nEn Sushi Aixa queremos celebrar tu cumpleaños contigo.\n¡Te regalamos "+c.premio+" en tu próxima visita!\n\nSolo muestra este mensaje al retirar. ¡Feliz cumpleaños! 🎉";
+  window.open("https://wa.me/"+num+"?text="+encodeURIComponent(msg),"_blank");
+}
+
+// ═══════════════════════════════════════════════════════
+// INSUMOS
+// ═══════════════════════════════════════════════════════
+function agregarInsumo(){
+  var nombre=document.getElementById('ins-nombre').value.trim();
+  var unidad=document.getElementById('ins-unidad').value;
+  var stock=parseFloat(document.getElementById('ins-stock').value)||0;
+  var minimo=parseFloat(document.getElementById('ins-minimo').value)||0;
+  var cat=document.getElementById('ins-categoria').value;
+  var prov=document.getElementById('ins-proveedor').value.trim();
+  if(!nombre){alert('Ingresa el nombre del insumo');return;}
+  var newIns = {nombre,unidad,stock,minimo,cat,prov,id:Date.now()};
+  insumos.push(newIns);
+  guardarInsumo(newIns);
+  renderInsumos();
+  actualizarSelectInsumos();
+  document.getElementById('ins-nombre').value='';
+  document.getElementById('ins-stock').value='';
+  document.getElementById('ins-minimo').value='';
+  document.getElementById('ins-proveedor').value='';
+}
+function renderInsumos(){
+  var cont=document.getElementById('lista-insumos');
+  document.getElementById('ins-count').textContent=insumos.length+' insumos';
+  if(insumos.length===0){cont.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Agrega tu primer insumo arriba</div>';return;}
+  var cats={};
+  insumos.forEach(function(ins){if(!cats[ins.cat])cats[ins.cat]=[];cats[ins.cat].push(ins);});
+  var html='';
+  Object.keys(cats).forEach(function(cat){
+    html+='<div style="padding:6px 14px;background:#faf8f4;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);">'+cat+'</div>';
+    cats[cat].forEach(function(ins,idx){
+      var estado=ins.stock<=0?'sout':ins.stock<=ins.minimo?'slow':'sok';
+      var label=ins.stock<=0?'Sin stock':ins.stock<=ins.minimo?'Stock bajo':'OK';
+      html+='<div class="insumo-row">'
+        +'<div><div class="ins-name">'+ins.nombre+'</div><div class="ins-meta">'+ins.unidad+' · Mín: '+ins.minimo+' · '+ins.prov+'</div></div>'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+          +'<span class="ins-meta" style="font-family:\'Cinzel\',serif;font-size:12px;font-weight:700;">'+ins.stock+' '+ins.unidad+'</span>'
+          +'<span class="stock-badge s'+estado.substring(1)+'">'+label+'</span>'
+          +'<button onclick="ajustarStock('+insumos.indexOf(ins)+')" class="btn-sm" style="font-size:9px;">Ajustar</button>'
+          +'<button onclick="eliminarInsumo('+insumos.indexOf(ins)+')" class="btn-danger-sm" style="font-size:9px;">✕</button>'
+        +'</div>'
+      +'</div>';
+    });
+  });
+  cont.innerHTML=html;
+}
+function ajustarStock(i){
+  var nuevo=prompt('Stock actual de "'+insumos[i].nombre+'" ('+insumos[i].unidad+'):',insumos[i].stock);
+  if(nuevo!==null){insumos[i].stock=parseFloat(nuevo)||0;renderInsumos();}
+}
+function eliminarInsumo(i){
+  if(confirm('¿Eliminar insumo "'+insumos[i].nombre+'"?')){insumos.splice(i,1);renderInsumos();actualizarSelectInsumos();}
+}
+function actualizarSelectInsumos(){
+  var sel=document.getElementById('c-insumo');
+  if(!sel) return;
+  sel.innerHTML='<option value="">Seleccionar insumo...</option>';
+  insumos.forEach(function(ins){
+    var opt=document.createElement('option');
+    opt.value=ins.nombre;
+    opt.dataset.unidad=ins.unidad;
+    opt.textContent=ins.nombre+' ('+ins.unidad+')';
+    sel.appendChild(opt);
+  });
+  // Opción agregar nuevo
+  var optNew=document.createElement('option');
+  optNew.value='__nuevo__';
+  optNew.textContent='➕ Agregar nuevo insumo...';
+  sel.appendChild(optNew);
+}
+function autoUnidad(){
+  var sel=document.getElementById('c-insumo');
+  var val=sel.value;
+  if(val==='__nuevo__'){sel.value='';showTab('insumos',document.querySelector('.tab[onclick*="insumos"]'));return;}
+  var opt=sel.options[sel.selectedIndex];
+  if(opt&&opt.dataset.unidad){document.getElementById('c-unidad').value=opt.dataset.unidad;}
+}
+
+// ═══════════════════════════════════════════════════════
+// COMPRAS
+// ═══════════════════════════════════════════════════════
+function previewTotal(){
+  var c=parseFloat(document.getElementById('c-cantidad').value)||0;
+  var p=parseFloat(document.getElementById('c-precio').value)||0;
+  var prev=document.getElementById('c-preview');
+  if(c>0&&p>0){prev.textContent='Total: $'+Math.round(c*p).toLocaleString('es-CL');prev.style.display='block';}
+  else prev.style.display='none';
+}
+function registrarCompra(){
+  var insumo=document.getElementById('c-insumo').value;
+  var cantidad=parseFloat(document.getElementById('c-cantidad').value);
+  var unidad=document.getElementById('c-unidad').value;
+  var precio=parseFloat(document.getElementById('c-precio').value);
+  var prov=document.getElementById('c-proveedor').value.trim();
+  var fecha=document.getElementById('c-fecha').value;
+  var boleta=document.getElementById('c-boleta').value.trim();
+  var tipoDoc=document.getElementById('c-tipo-doc').value;
+  if(!insumo||!cantidad||!precio||!fecha){alert('Completa: Insumo, Cantidad, Precio y Fecha');return;}
+  var total=Math.round(cantidad*precio);
+  var newComp = {insumo,cantidad,unidad,precio,total,proveedor:prov||'Sin especificar',fecha,boleta:boleta||'—',tipoDoc,id:Date.now()};
+  compras.unshift(newComp);
+  guardarCompra(newComp);
+  renderHistorialCompras();
+  actualizarStatsCompras();
+  actualizarLibroCompras();
+  calcularF29();
+  document.getElementById('c-insumo').value='';
+  document.getElementById('c-cantidad').value='';
+  document.getElementById('c-precio').value='';
+  document.getElementById('c-proveedor').value='';
+  document.getElementById('c-boleta').value='';
+  document.getElementById('c-preview').style.display='none';
+}
+function renderHistorialCompras(){
+  var cont=document.getElementById('historial-compras');
+  if(compras.length===0){cont.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Las compras registradas aparecerán aquí</div>';return;}
+  cont.innerHTML=compras.map(function(c,i){
+    return '<div class="insumo-row">'
+      +'<div style="flex:1;"><div class="ins-name">'+c.insumo+'</div><div class="ins-meta">'+c.cantidad+' '+c.unidad+' · $'+Math.round(c.precio).toLocaleString('es-CL')+' c/u · '+c.proveedor+' · '+c.tipoDoc+' '+c.boleta+'</div></div>'
+      +'<div style="text-align:right;"><div style="font-family:\'Cinzel\',serif;font-size:13px;font-weight:700;color:var(--g);">$'+c.total.toLocaleString('es-CL')+'</div>'
+      +'<div style="font-size:10px;color:var(--muted);">'+c.fecha+'</div></div>'
+      +'<button onclick="eliminarCompra('+i+')" class="btn-danger-sm">✕</button>'
+    +'</div>';
+  }).join('');
+}
+function eliminarCompra(i){
+  if(confirm('¿Eliminar esta compra?')){compras.splice(i,1);renderHistorialCompras();actualizarStatsCompras();calcularF29();}
+}
+function actualizarStatsCompras(){
+  var total=compras.reduce(function(s,c){return s+c.total;},0);
+  var hoy=new Date().toISOString().split('T')[0];
+  var sem=compras.filter(function(c){return (new Date(hoy)-new Date(c.fecha))/(864e5)<=7;}).reduce(function(s,c){return s+c.total;},0);
+  document.getElementById('tc-mes').textContent='$'+total.toLocaleString('es-CL');
+  document.getElementById('tc-sem').textContent='$'+sem.toLocaleString('es-CL');
+  document.getElementById('tc-num').textContent=compras.length;
+  if(compras.length>0){var mx=compras.reduce(function(a,b){return a.total>b.total?a:b;});document.getElementById('tc-mayor').textContent=mx.insumo.split(' ')[0];}
+}
+function actualizarLibroCompras(){
+  var facturas=compras.filter(function(c){return c.tipoDoc==='Factura';});
+  var body=document.getElementById('libro-compras-body');
+  if(!body) return;
+  if(facturas.length===0){body.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);font-style:italic;font-size:11px;padding:12px;">Registra compras con factura para verlas acá</td></tr>';return;}
+  body.innerHTML=facturas.map(function(c){
+    var neto=Math.round(c.total/1.19);
+    var iva=c.total-neto;
+    return '<tr><td>'+c.fecha+'</td><td>'+c.proveedor+'</td><td>'+c.boleta+'</td><td class="num">$'+neto.toLocaleString('es-CL')+'</td><td class="num">$'+iva.toLocaleString('es-CL')+'</td></tr>';
+  }).join('');
+}
+function exportarCSV(){
+  if(compras.length===0){alert('No hay compras');return;}
+  var csv='Fecha,Insumo,Cantidad,Unidad,Precio Unitario,Total,Proveedor,Documento,Número\n';
+  compras.forEach(function(c){csv+=[c.fecha,c.insumo,c.cantidad,c.unidad,c.precio,c.total,c.proveedor,c.tipoDoc,c.boleta].join(',')+'\n';});
+  descargar(csv,'compras_sushiaixa.csv','text/csv');
+}
+
+// ═══════════════════════════════════════════════════════
+// CARTA EDITOR
+// ═══════════════════════════════════════════════════════
+function renderCarta(){
+  var cont=document.getElementById('carta-container');
+  var html='';
+  Object.keys(platos).forEach(function(cat){
+    html+='<div class="card" style="margin-bottom:10px;">'
+      +'<div class="card-header"><span class="card-title">'+cat+'</span></div>'
+      +'<div>';
+    platos[cat].forEach(function(p,idx){
+      var parts=p.split('|');
+      var nombre=parts[0]; var precio=parts[1];
+      var key=cat+'_'+idx;
+      if(platosActivos[key]===undefined) platosActivos[key]=true;
+      html+='<div class="carta-item">'
+        +'<span class="carta-name">'+nombre+'</span>'
+        +'<span class="carta-price">'+precio+'</span>'
+        +'<div class="toggle '+(platosActivos[key]?'on':'off')+'" onclick="togglePlato(\''+key+'\')" id="tog-'+key+'"></div>'
+        +'<button onclick="editarPrecio(\''+key+'\',\''+nombre+'\',\''+precio+'\')" class="btn-sm" style="font-size:9px;">✏️</button>'
+        +'<button onclick="eliminarPlatoCarta(\''+cat+'\','+idx+')" class="btn-danger-sm" style="font-size:9px;">✕</button>'
+      +'</div>';
+    });
+    html+='</div></div>';
+  });
+  cont.innerHTML=html;
+}
+function togglePlato(key){
+  platosActivos[key]=!platosActivos[key];
+  var tog=document.getElementById('tog-'+key);
+  if(tog) tog.className='toggle '+(platosActivos[key]?'on':'off');
+}
+function editarPrecio(key,nombre,precioActual){
+  var nuevo=prompt('Nuevo precio para "'+nombre+'":',precioActual.replace('$','').replace('.',''));
+  if(nuevo){
+    var parts=key.split('_'); var cat=parts.slice(0,-1).join('_'); var idx=parseInt(parts[parts.length-1]);
+    // Reconstruct: buscar en platos
+    Object.keys(platos).forEach(function(c){
+      platos[c]=platos[c].map(function(p,i){
+        if(c+'_'+i===key) return p.split('|')[0]+'|$'+parseInt(nuevo).toLocaleString('es-CL');
+        return p;
+      });
+    });
+    renderCarta();
+  }
+}
+function eliminarPlatoCarta(cat,idx){
+  if(confirm('¿Eliminar "'+platos[cat][idx].split('|')[0]+'" de la carta?')){platos[cat].splice(idx,1);renderCarta();}
+}
+function agregarPlato(){
+  var nombre=document.getElementById('nuevo-plato').value.trim();
+  var precio=parseInt(document.getElementById('nuevo-precio').value)||0;
+  var cat=document.getElementById('nuevo-cat').value;
+  if(!nombre||!precio){alert('Ingresa nombre y precio');return;}
+  if(!platos[cat]) platos[cat]=[];
+  platos[cat].push(nombre+'|$'+precio.toLocaleString('es-CL'));
+  renderCarta();
+  document.getElementById('nuevo-plato').value='';
+  document.getElementById('nuevo-precio').value='';
+}
+
+// ═══════════════════════════════════════════════════════
+// CONTABILIDAD — F29
+// ═══════════════════════════════════════════════════════
+var VENTAS_MES=2840500;
+function calcularF29(){
+  var neto=Math.round(VENTAS_MES/1.19);
+  var debito=VENTAS_MES-neto;
+  var facturas=compras.filter(function(c){return c.tipoDoc==='Factura';});
+  var creditoTotal=facturas.reduce(function(s,c){return s+Math.round((c.total-Math.round(c.total/1.19)));},0);
+  var ivaP=Math.max(0,debito-creditoTotal);
+  var ppm=Math.round(neto*0.01);
+  var total=ivaP+ppm;
+  var fmt=function(n){return '$'+n.toLocaleString('es-CL');};
+  document.getElementById('f29-neto').textContent=fmt(neto);
+  document.getElementById('f29-debito').textContent=fmt(debito);
+  document.getElementById('f29-credito').textContent=fmt(creditoTotal);
+  document.getElementById('f29-pagar').textContent=fmt(ivaP);
+  document.getElementById('f29-ppm').textContent=fmt(ppm);
+  document.getElementById('f29-total').textContent=fmt(total);
+  var fl=document.getElementById('flujo-iva');
+  var pliva=document.getElementById('pl-iva');
+  var plppm=document.getElementById('pl-ppm');
+  if(fl) fl.textContent=fmt(ivaP);
+  if(pliva) pliva.textContent=fmt(ivaP);
+  if(plppm) plppm.textContent=fmt(ppm);
+  // Lista facturas en F29
+  var listF=document.getElementById('f29-facturas-list');
+  if(listF){
+    if(facturas.length===0){listF.innerHTML='<div style="font-size:12px;color:var(--muted);font-style:italic;">Registra compras con factura en el módulo Compras para ver el crédito acá</div>';}
+    else{listF.innerHTML=facturas.map(function(c){var iva=Math.round(c.total-(Math.round(c.total/1.19)));return '<div class="iva-row"><span>'+c.proveedor+' · '+c.boleta+'</span><span style="color:var(--success);font-weight:700;">$'+iva.toLocaleString('es-CL')+'</span></div>';}).join('');}
+  }
+  return {ivaP,ppm,total,creditoTotal};
+}
+
+// ═══════════════════════════════════════════════════════
+// REMUNERACIONES
+// ═══════════════════════════════════════════════════════
+function calcLiquidacion(){
+  var bruto=parseFloat(document.getElementById('rem-sueldo').value)||0;
+  if(bruto===0){document.getElementById('liquidacion-preview').style.display='none';return;}
+  var afp=parseFloat(document.getElementById('rem-afp').value);
+  var salud=parseFloat(document.getElementById('rem-salud').value);
+  var descAfp=Math.round(bruto*afp);
+  var descSalud=Math.round(bruto*salud);
+  var liquido=bruto-descAfp-descSalud;
+  var cotPatronal=Math.round(bruto*0.0293);
+  var doc=document.getElementById('liquidacion-preview');
+  document.getElementById('liq-detalle').innerHTML=
+    '<div class="iva-row"><span>Sueldo bruto</span><span style="font-weight:700;">$'+bruto.toLocaleString('es-CL')+'</span></div>'
+    +'<div class="iva-row"><span>AFP ('+Math.round(afp*100)+'%)</span><span style="color:var(--danger);">−$'+descAfp.toLocaleString('es-CL')+'</span></div>'
+    +'<div class="iva-row"><span>Salud (7%)</span><span style="color:var(--danger);">−$'+descSalud.toLocaleString('es-CL')+'</span></div>'
+    +'<div class="iva-row total"><span>Sueldo líquido</span><span style="color:var(--success);">$'+liquido.toLocaleString('es-CL')+'</span></div>'
+    +'<div class="iva-row" style="color:var(--muted);"><span>Cotización patronal (2.93%)</span><span>$'+cotPatronal.toLocaleString('es-CL')+'</span></div>';
+  doc.style.display='block';
+}
+function agregarTrabajador(){
+  var nombre=document.getElementById('rem-nombre').value.trim();
+  var rut=document.getElementById('rem-rut').value.trim();
+  var bruto=parseFloat(document.getElementById('rem-sueldo').value)||0;
+  var afp=parseFloat(document.getElementById('rem-afp').value);
+  var salud=parseFloat(document.getElementById('rem-salud').value);
+  var cargo=document.getElementById('rem-cargo').value.trim();
+  if(!nombre||!bruto){alert('Ingresa nombre y sueldo');return;}
+  var descAfp=Math.round(bruto*afp); var descSalud=Math.round(bruto*salud);
+  var liquido=bruto-descAfp-descSalud;
+  var newTrab = {nombre,rut,bruto,descAfp,descSalud,liquido,cargo,id:Date.now()};
+  trabajadores.push(newTrab);
+  guardarTrabajador(newTrab);
+  renderTrabajadores();
+  document.getElementById('rem-nombre').value='';
+  document.getElementById('rem-rut').value='';
+  document.getElementById('rem-sueldo').value='';
+  document.getElementById('rem-cargo').value='';
+  document.getElementById('liquidacion-preview').style.display='none';
+}
+function renderTrabajadores(){
+  var cont=document.getElementById('lista-trabajadores');
+  var totalBruto=trabajadores.reduce(function(s,t){return s+t.bruto;},0);
+  var totalLiq=trabajadores.reduce(function(s,t){return s+t.liquido;},0);
+  if(trabajadores.length===0){cont.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Agrega trabajadores arriba</div>';return;}
+  var html=trabajadores.map(function(t,i){
+    return '<div class="insumo-row">'
+      +'<div style="flex:1;"><div class="ins-name">'+t.nombre+(t.cargo?' — '+t.cargo:'')+'</div><div class="ins-meta">'+t.rut+'</div></div>'
+      +'<div style="text-align:right;">'
+        +'<div style="font-size:11px;color:var(--muted);">Bruto: $'+t.bruto.toLocaleString('es-CL')+'</div>'
+        +'<div style="font-family:\'Cinzel\',serif;font-size:13px;font-weight:700;color:var(--g);">Líquido: $'+t.liquido.toLocaleString('es-CL')+'</div>'
+      +'</div>'
+      +'<button onclick="eliminarTrabajador('+i+')" class="btn-danger-sm">✕</button>'
+    +'</div>';
+  }).join('');
+  html+='<div class="footer-total"><span>Total bruto</span><span>$'+totalBruto.toLocaleString('es-CL')+'</span></div>';
+  cont.innerHTML=html;
+  var fr=document.getElementById('flujo-rem'); var pr=document.getElementById('pl-rem'); var ir=document.getElementById('inf-rem');
+  if(fr) fr.textContent='$'+totalBruto.toLocaleString('es-CL');
+  if(pr) pr.textContent='$'+totalBruto.toLocaleString('es-CL');
+  if(ir) ir.textContent='$'+totalBruto.toLocaleString('es-CL');
+}
+function eliminarTrabajador(i){if(confirm('¿Eliminar?')){trabajadores.splice(i,1);renderTrabajadores();}}
+function exportarNomina(){
+  if(trabajadores.length===0){alert('No hay trabajadores');return;}
+  var csv='Nombre,RUT,Cargo,Sueldo Bruto,Desc AFP,Desc Salud,Sueldo Liquido\n';
+  trabajadores.forEach(function(t){csv+=[t.nombre,t.rut,t.cargo,t.bruto,t.descAfp,t.descSalud,t.liquido].join(',')+'\n';});
+  descargar(csv,'nomina_sushiaixa.csv','text/csv');
+}
+
+// ═══════════════════════════════════════════════════════
+// ACTIVOS FIJOS
+// ═══════════════════════════════════════════════════════
+function agregarActivo(){
+  var nombre=document.getElementById('act-nombre').value.trim();
+  var valor=parseFloat(document.getElementById('act-valor').value)||0;
+  var vida=parseInt(document.getElementById('act-vida').value)||1;
+  var fecha=document.getElementById('act-fecha').value;
+  if(!nombre||!valor){alert('Ingresa nombre y valor');return;}
+  var depMes=Math.round(valor/(vida*12));
+  activos.push({nombre,valor,vida,fecha,depMes});
+  renderActivos();
+  document.getElementById('act-nombre').value='';
+  document.getElementById('act-valor').value='';
+  document.getElementById('act-vida').value='';
+}
+function renderActivos(){
+  var cont=document.getElementById('lista-activos');
+  if(activos.length===0){cont.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Agrega activos arriba para calcular depreciación</div>';return;}
+  var totalDep=activos.reduce(function(s,a){return s+a.depMes;},0);
+  cont.innerHTML=activos.map(function(a,i){
+    return '<div class="insumo-row">'
+      +'<div style="flex:1;"><div class="ins-name">'+a.nombre+'</div><div class="ins-meta">Vida útil: '+a.vida+' años · Compra: '+(a.fecha||'—')+'</div></div>'
+      +'<div style="text-align:right;"><div style="font-size:11px;color:var(--muted);">Valor: $'+a.valor.toLocaleString('es-CL')+'</div>'
+      +'<div style="font-family:\'Cinzel\',serif;font-size:12px;font-weight:700;color:var(--g);">Dep/mes: $'+a.depMes.toLocaleString('es-CL')+'</div></div>'
+      +'<button onclick="activos.splice('+i+',1);renderActivos();" class="btn-danger-sm">✕</button>'
+    +'</div>';
+  }).join('')
+  +'<div class="footer-total"><span>Depreciación mensual total</span><span>$'+totalDep.toLocaleString('es-CL')+'</span></div>';
+  cont.innerHTML=cont.innerHTML;
+}
+
+// ═══════════════════════════════════════════════════════
+// GASTOS FIJOS
+// ═══════════════════════════════════════════════════════
+function agregarGastoFijo(){
+  var nombre=document.getElementById('gf-nombre').value.trim();
+  var monto=parseFloat(document.getElementById('gf-monto').value)||0;
+  var cat=document.getElementById('gf-cat').value;
+  if(!nombre||!monto){alert('Ingresa descripción y monto');return;}
+  gastosFijos.push({nombre,monto,cat});
+  renderGastosFijos();
+  document.getElementById('gf-nombre').value='';
+  document.getElementById('gf-monto').value='';
+}
+function renderGastosFijos(){
+  var cont=document.getElementById('lista-gf');
+  var total=gastosFijos.reduce(function(s,g){return s+g.monto;},0);
+  document.getElementById('total-gf').textContent='Total: $'+total.toLocaleString('es-CL');
+  if(gastosFijos.length===0){cont.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Agrega gastos fijos arriba</div>';return;}
+  cont.innerHTML=gastosFijos.map(function(g,i){
+    return '<div class="insumo-row">'
+      +'<div style="flex:1;"><div class="ins-name">'+g.nombre+'</div><div class="ins-meta">'+g.cat+'</div></div>'
+      +'<div style="font-family:\'Cinzel\',serif;font-size:13px;font-weight:700;color:var(--g);">$'+g.monto.toLocaleString('es-CL')+'/mes</div>'
+      +'<button onclick="gastosFijos.splice('+i+',1);renderGastosFijos();" class="btn-danger-sm">✕</button>'
+    +'</div>';
+  }).join('')+'<div class="footer-total"><span>Total mensual</span><span>$'+total.toLocaleString('es-CL')+'</span></div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// INFORME CONTADOR
+// ═══════════════════════════════════════════════════════
+function actualizarInforme(){
+  var f29=calcularF29();
+  var totRem=trabajadores.reduce(function(s,t){return s+t.bruto;},0);
+  var utilidad=VENTAS_MES-1120300-totRem-900000-85000-45000-f29.ivaP-f29.ppm;
+  var fmt=function(n){return '$'+n.toLocaleString('es-CL');};
+  var ic=document.getElementById('inf-credito');
+  var ir=document.getElementById('inf-rem');
+  var ii=document.getElementById('inf-iva');
+  var ip=document.getElementById('inf-ppm');
+  var iu=document.getElementById('inf-utilidad');
+  if(ic) ic.textContent=fmt(f29.creditoTotal);
+  if(ir) ir.textContent=fmt(totRem);
+  if(ii) ii.textContent=fmt(f29.ivaP);
+  if(ip) ip.textContent=fmt(f29.ppm);
+  if(iu) iu.textContent=fmt(Math.max(0,utilidad));
+}
+function exportarInformeContador(){
+  var f29=calcularF29();
+  var totRem=trabajadores.reduce(function(s,t){return s+t.bruto;},0);
+  var csv='INFORME MENSUAL SUSHI AIXA - MAYO 2026\n\n';
+  csv+='VENTAS,'+VENTAS_MES+'\n';
+  csv+='IVA DEBITO,'+Math.round((VENTAS_MES-Math.round(VENTAS_MES/1.19)))+'\n';
+  csv+='IVA CREDITO,'+f29.creditoTotal+'\n';
+  csv+='IVA A PAGAR,'+f29.ivaP+'\n';
+  csv+='PPM,'+f29.ppm+'\n';
+  csv+='REMUNERACIONES,'+totRem+'\n\n';
+  csv+='COMPRAS CON FACTURA\n';
+  compras.filter(function(c){return c.tipoDoc==='Factura';}).forEach(function(c){
+    csv+=c.fecha+','+c.proveedor+','+c.boleta+','+c.total+'\n';
+  });
+  descargar(csv,'informe_contador_sushiaixa_mayo2026.csv','text/csv');
+}
+function exportarLibroVentas(){descargar('Fecha,Documento,Neto,IVA,Total\n17/05,Boleta 1234,15756,2994,18750\n','libro_ventas.csv','text/csv');}
+function exportarLibroCompras(){
+  var csv='Fecha,Proveedor,Documento,Neto,IVA\n';
+  compras.filter(function(c){return c.tipoDoc==='Factura';}).forEach(function(c){
+    var neto=Math.round(c.total/1.19);
+    csv+=c.fecha+','+c.proveedor+','+c.boleta+','+neto+','+(c.total-neto)+'\n';
+  });
+  descargar(csv,'libro_compras.csv','text/csv');
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILIDADES
+// ═══════════════════════════════════════════════════════
+function descargar(contenido,nombre,tipo){
+  var blob=new Blob([contenido],{type:tipo+';charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download=nombre; a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},100);
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',function(){
+  initSupabase().then(() => suscribirPedidos());
+  var hoy=new Date().toISOString().split('T')[0];
+  var cf=document.getElementById('c-fecha'); if(cf) cf.value=hoy;
+  var af=document.getElementById('act-fecha'); if(af) af.value=hoy;
+  renderCarta();
+  calcularF29();
+  verificarCumpleanos();
+  actualizarSelectInsumos();
+});
+
+// ═══════════════════════════════════════════════════════
+// CAJA LOCAL
+// ═══════════════════════════════════════════════════════
+var pedidosLocales = [];
+var cajaPlatosTemp = [];
+
+function initCajaSelect(){
+  var sel = document.getElementById('caja-plato-sel');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Seleccionar plato...</option>';
+  Object.keys(platos).forEach(function(cat){
+    var og = document.createElement('optgroup');
+    og.label = cat;
+    platos[cat].forEach(function(p){
+      var parts = p.split('|');
+      var opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = parts[0] + ' — ' + parts[1];
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+}
+
+function agregarPlatoACaja(){
+  var sel = document.getElementById('caja-plato-sel');
+  var val = sel.value;
+  if(!val) return;
+  var parts = val.split('|');
+  var nombre = parts[0];
+  var precio = parseInt(parts[1].replace(/[$.,]/g,''))||0;
+  cajaPlatosTemp.push({nombre, precio});
+  renderCajaItems();
+  sel.value = '';
+  // Actualizar total automáticamente
+  var totalActual = cajaPlatosTemp.reduce(function(s,p){return s+p.precio;},0);
+  document.getElementById('caja-total').value = totalActual;
+  calcVuelto();
+}
+
+function renderCajaItems(){
+  var cont = document.getElementById('caja-items');
+  var list = document.getElementById('caja-items-list');
+  var sub  = document.getElementById('caja-subtotal');
+  if(cajaPlatosTemp.length===0){cont.style.display='none';return;}
+  cont.style.display='block';
+  var total = cajaPlatosTemp.reduce(function(s,p){return s+p.precio;},0);
+  sub.textContent = '$'+total.toLocaleString('es-CL');
+  list.innerHTML = cajaPlatosTemp.map(function(p,i){
+    return '<div class="insumo-row" style="padding:6px 12px;">'
+      +'<span style="flex:1;font-size:12px;">'+p.nombre+'</span>'
+      +'<span style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--g);">$'+p.precio.toLocaleString('es-CL')+'</span>'
+      +'<button onclick="cajaPlatosTemp.splice('+i+',1);renderCajaItems();document.getElementById('caja-total').value=cajaPlatosTemp.reduce(function(s,p){return s+p.precio;},0);calcVuelto();" class="btn-danger-sm" style="font-size:9px;">✕</button>'
+    +'</div>';
+  }).join('');
+}
+
+function calcVuelto(){
+  var pago = document.getElementById('caja-pago').value;
+  var monto = parseFloat(document.getElementById('caja-monto').value)||0;
+  var total = parseFloat(document.getElementById('caja-total').value)||0;
+  var wrap = document.getElementById('caja-vuelto-wrap');
+  var tinfo = document.getElementById('caja-transfer-info');
+  tinfo.style.display = pago==='transferencia' ? 'block' : 'none';
+  if(pago==='efectivo' && monto>0 && total>0){
+    var vuelto = monto - total;
+    document.getElementById('caja-vuelto').textContent = '$'+Math.max(0,vuelto).toLocaleString('es-CL');
+    wrap.style.display = 'block';
+    wrap.style.background = vuelto>=0 ? '#f0faf4' : '#fee2e2';
+    wrap.style.borderColor = vuelto>=0 ? '#c8e6c9' : '#fca5a5';
+    document.getElementById('caja-vuelto').style.color = vuelto>=0 ? '#1b5e20' : '#991b1b';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function registrarPedidoLocal(){
+  var nombre = document.getElementById('caja-nombre').value.trim() || 'Cliente presencial';
+  var pago   = document.getElementById('caja-pago').value;
+  var total  = parseFloat(document.getElementById('caja-total').value)||0;
+  if(total===0 && cajaPlatosTemp.length===0){alert('Agrega al menos un plato o ingresa el total');return;}
+  if(total===0) total = cajaPlatosTemp.reduce(function(s,p){return s+p.precio;},0);
+  var items = cajaPlatosTemp.length>0 ? cajaPlatosTemp.map(function(p){return p.nombre;}).join(', ') : 'Pedido manual';
+  var ahora = new Date();
+  var hora = String(ahora.getHours()).padStart(2,'0')+':'+String(ahora.getMinutes()).padStart(2,'0');
+  var newPed = {nombre,pago,total,items:cajaPlatosTemp.slice(),hora,id:Date.now()};
+  pedidosLocales.push(newPed);
+  guardarPedidoLocal(newPed);
+  cajaPlatosTemp = [];
+  renderCajaItems();
+  renderHistorialCaja();
+  actualizarStatsCaja();
+  document.getElementById('caja-nombre').value='';
+  document.getElementById('caja-monto').value='';
+  document.getElementById('caja-total').value='';
+  document.getElementById('caja-vuelto-wrap').style.display='none';
+  document.getElementById('caja-transfer-info').style.display='none';
+  document.getElementById('caja-items').style.display='none';
+  alert('✅ Pedido registrado: '+nombre+' · $'+total.toLocaleString('es-CL'));
+}
+
+function renderHistorialCaja(){
+  var cont = document.getElementById('caja-historial');
+  if(pedidosLocales.length===0){
+    cont.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;">Los pedidos registrados aparecerán aquí</div>';
+    return;
+  }
+  cont.innerHTML = pedidosLocales.slice().reverse().map(function(p,i){
+    var pagoIcon = p.pago==='efectivo'?'💵':'📲';
+    return '<div class="insumo-row">'
+      +'<div style="flex:1;">'
+        +'<div class="ins-name">'+p.nombre+'</div>'
+        +'<div class="ins-meta">'+p.items+'</div>'
+      +'</div>'
+      +'<div style="text-align:right;">'
+        +'<div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--g);">$'+p.total.toLocaleString('es-CL')+'</div>'
+        +'<div style="font-size:10px;color:var(--muted);">'+pagoIcon+' '+p.hora+'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function actualizarStatsCaja(){
+  var total = pedidosLocales.reduce(function(s,p){return s+p.total;},0);
+  var ef    = pedidosLocales.filter(function(p){return p.pago==='efectivo';}).reduce(function(s,p){return s+p.total;},0);
+  var tr    = pedidosLocales.filter(function(p){return p.pago==='transferencia';}).reduce(function(s,p){return s+p.total;},0);
+  document.getElementById('caja-total-dia').textContent='$'+total.toLocaleString('es-CL');
+  document.getElementById('caja-efectivo').textContent='$'+ef.toLocaleString('es-CL');
+  document.getElementById('caja-transf').textContent='$'+tr.toLocaleString('es-CL');
+  document.getElementById('caja-num').textContent=pedidosLocales.length;
+}
+
+function cierreCaja(){
+  if(pedidosLocales.length===0){alert('No hay pedidos hoy');return;}
+  var total = pedidosLocales.reduce(function(s,p){return s+p.total;},0);
+  var ef    = pedidosLocales.filter(function(p){return p.pago==='efectivo';}).reduce(function(s,p){return s+p.total;},0);
+  var tr    = pedidosLocales.filter(function(p){return p.pago==='transferencia';}).reduce(function(s,p){return s+p.total;},0);
+  var csv = 'CIERRE DE CAJA - '+new Date().toLocaleDateString('es-CL')+'\n\n';
+  csv += 'Total ventas,$'+total.toLocaleString('es-CL')+'\n';
+  csv += 'Efectivo,$'+ef.toLocaleString('es-CL')+'\n';
+  csv += 'Transferencias,$'+tr.toLocaleString('es-CL')+'\n';
+  csv += 'N° pedidos,'+pedidosLocales.length+'\n\n';
+  csv += 'DETALLE\nCliente,Pago,Total,Hora,Items\n';
+  pedidosLocales.forEach(function(p){
+    csv += [p.nombre,p.pago,'$'+p.total,p.hora,p.items].join(',')+'\n';
+  });
+  descargar(csv,'cierre_caja_'+new Date().toISOString().split('T')[0]+'.csv','text/csv');
+}
+
+// Inicializar select de caja al cargar
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(initCajaSelect, 100);
+});
+
+// Actualizar select cuando cambia el pago
+document.addEventListener('DOMContentLoaded', function(){
+  var pagoSel = document.getElementById('caja-pago');
+  if(pagoSel) pagoSel.addEventListener('change', calcVuelto);
+});
+
+
+function exportarAmortizacion(){
+  var csv = "Mes,Saldo Inicial,Capital,Interes,Cuota Total,Saldo Final\n";
+  var rows = document.querySelectorAll("#cont-mutuo .vtable tbody tr");
+  rows.forEach(function(r){
+    var cells = r.querySelectorAll("td");
+    var vals = Array.from(cells).map(function(c){return c.textContent.replace(/\./g,"").replace("$","").trim();});
+    csv += vals.join(",") + "\n";
+  });
+  descargar(csv, "amortizacion_mutuo_sushiaixa.csv", "text/csv");
+}
+
+
+// ═══════════════════════════════════════════════════
+// SUPABASE — Conexión a base de datos real
+// ═══════════════════════════════════════════════════
+const SUPABASE_URL = 'https://znhdoocftyoglmicohge.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_FoZO8NNiyGCIu3YR7vRBAw_zGKifWWU';
+
+// Cliente Supabase
+let supabase;
+async function initSupabase() {
+  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+  supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  console.log('✅ Supabase conectado');
+  await cargarDatosIniciales();
+}
+
+// ── CARGAR DATOS DESDE BD ──
+async function cargarDatosIniciales() {
+  try {
+    // Cargar insumos
+    const { data: ins } = await supabase.from('insumos').select('*').eq('activo', true).order('categoria');
+    if(ins) {
+      insumos = ins.map(i => ({
+        id: i.id, nombre: i.nombre, unidad: i.unidad,
+        stock: i.stock_actual, minimo: i.stock_minimo,
+        cat: i.categoria, prov: i.proveedor || ''
+      }));
+      renderInsumos();
+      actualizarSelectInsumos();
+    }
+
+    // Cargar clientes
+    const { data: cli } = await supabase.from('clientes').select('*').order('nombre');
+    if(cli) {
+      clientes = cli.map(c => ({
+        id: c.id, nombre: c.nombre, tel: c.telefono,
+        cumple: c.fecha_nacimiento, premio: c.premio_cumple,
+        dir: c.direccion || '', pref: c.preferencias || '',
+        pedidos: c.total_pedidos, ltv: c.total_gastado
+      }));
+      renderClientes();
+    }
+
+    // Cargar compras
+    const { data: comp } = await supabase.from('compras').select('*').order('created_at', {ascending: false}).limit(50);
+    if(comp) {
+      compras = comp.map(c => ({
+        id: c.id, insumo: c.insumo_nombre, cantidad: c.cantidad,
+        unidad: c.unidad, precio: c.precio_unitario, total: c.total,
+        proveedor: c.proveedor || '', fecha: c.fecha,
+        boleta: c.numero_documento || '—', tipoDoc: c.tipo_documento
+      }));
+      renderHistorialCompras();
+      actualizarStatsCompras();
+    }
+
+    // Cargar carta
+    const { data: cart } = await supabase.from('carta').select('*').order('orden');
+    if(cart) {
+      platos = {};
+      cart.forEach(p => {
+        if(!platos[p.categoria]) platos[p.categoria] = [];
+        platos[p.categoria].push(p.nombre + '|$' + parseInt(p.precio).toLocaleString('es-CL'));
+        platosActivos[p.categoria + '_' + (platos[p.categoria].length-1)] = p.activo;
+      });
+      renderCarta();
+    }
+
+    // Cargar trabajadores
+    const { data: trab } = await supabase.from('trabajadores').select('*').eq('activo', true);
+    if(trab) {
+      trabajadores = trab.map(t => ({
+        id: t.id, nombre: t.nombre, rut: t.rut, cargo: t.cargo || '',
+        bruto: t.sueldo_bruto,
+        descAfp: Math.round(t.sueldo_bruto * t.tasa_afp),
+        descSalud: Math.round(t.sueldo_bruto * t.tasa_salud),
+        liquido: Math.round(t.sueldo_bruto * (1 - t.tasa_afp - t.tasa_salud))
+      }));
+      renderTrabajadores();
+    }
+
+    // Cargar pedidos recientes
+    const { data: peds } = await supabase.from('pedidos').select('*')
+      .neq('estado', 'done').order('created_at', {ascending: false}).limit(20);
+    if(peds && peds.length > 0) {
+      renderPedidosSupabase(peds);
+    }
+
+    // Cargar gastos fijos
+    const { data: gf } = await supabase.from('gastos_fijos').select('*').eq('activo', true);
+    if(gf) {
+      gastosFijos = gf.map(g => ({ id: g.id, nombre: g.descripcion, monto: g.monto_mensual, cat: g.categoria }));
+      renderGastosFijos();
+    }
+
+    // Cargar activos
+    const { data: act } = await supabase.from('activos_fijos').select('*').eq('activo', true);
+    if(act) {
+      activos = act.map(a => ({ id: a.id, nombre: a.nombre, valor: a.valor_compra, vida: a.vida_util_anos, depMes: a.depreciacion_mensual, fecha: a.fecha_compra }));
+      renderActivos();
+    }
+
+    console.log('✅ Datos cargados desde Supabase');
+    mostrarToast('✅ Datos sincronizados con la base de datos');
+  } catch(e) {
+    console.error('Error cargando datos:', e);
+    mostrarToast('⚠️ Modo offline — datos locales');
+  }
+}
+
+// ── GUARDAR EN BD ──
+async function guardarCliente(cliente) {
+  if(!supabase) return;
+  const { error } = await supabase.from('clientes').upsert({
+    nombre: cliente.nombre, telefono: cliente.tel,
+    fecha_nacimiento: cliente.cumple || null,
+    premio_cumple: cliente.premio, direccion: cliente.dir,
+    preferencias: cliente.pref
+  }, { onConflict: 'telefono' });
+  if(error) console.error('Error guardando cliente:', error);
+}
+
+async function guardarCompra(compra) {
+  if(!supabase) return;
+  const { error } = await supabase.from('compras').insert({
+    insumo_nombre: compra.insumo, cantidad: compra.cantidad,
+    unidad: compra.unidad, precio_unitario: compra.precio,
+    total: compra.total, proveedor: compra.proveedor,
+    tipo_documento: compra.tipoDoc, numero_documento: compra.boleta,
+    tiene_iva: compra.tipoDoc === 'Factura',
+    iva_monto: compra.tipoDoc === 'Factura' ? Math.round(compra.total - compra.total/1.19) : 0,
+    neto_monto: compra.tipoDoc === 'Factura' ? Math.round(compra.total/1.19) : compra.total,
+    fecha: compra.fecha
+  });
+  if(error) console.error('Error guardando compra:', error);
+  else console.log('✅ Compra guardada en BD');
+}
+
+async function guardarInsumo(ins) {
+  if(!supabase) return;
+  const { error } = await supabase.from('insumos').upsert({
+    nombre: ins.nombre, categoria: ins.cat, unidad: ins.unidad,
+    stock_actual: ins.stock, stock_minimo: ins.minimo,
+    proveedor: ins.prov
+  }, { onConflict: 'nombre' });
+  if(error) console.error('Error guardando insumo:', error);
+}
+
+async function guardarPedidoLocal(pedido) {
+  if(!supabase) return;
+  const { error } = await supabase.from('pedidos').insert({
+    cliente_nombre: pedido.nombre, tipo: 'local',
+    estado: 'done', metodo_pago: pedido.pago,
+    items: pedido.items ? pedido.items.map(i => ({ nombre: i.nombre, precio: i.precio })) : [],
+    subtotal: pedido.total, total: pedido.total, origen: 'local'
+  });
+  if(error) console.error('Error guardando pedido:', error);
+}
+
+async function actualizarEstadoPedido(pedidoId, nuevoEstado) {
+  if(!supabase || !pedidoId) return;
+  const { error } = await supabase.from('pedidos')
+    .update({ estado: nuevoEstado, updated_at: new Date().toISOString() })
+    .eq('id', pedidoId);
+  if(error) console.error('Error actualizando estado:', error);
+}
+
+async function guardarTrabajador(trab) {
+  if(!supabase) return;
+  const afpTasa = parseFloat(document.getElementById('rem-afp').value);
+  const saludTasa = parseFloat(document.getElementById('rem-salud').value);
+  const { error } = await supabase.from('trabajadores').insert({
+    nombre: trab.nombre, rut: trab.rut, cargo: trab.cargo,
+    sueldo_bruto: trab.bruto, tasa_afp: afpTasa, tasa_salud: saludTasa
+  });
+  if(error) console.error('Error guardando trabajador:', error);
+}
+
+function renderPedidosSupabase(peds) {
+  const cont = document.getElementById('pedidos-container');
+  if(!cont || peds.length === 0) return;
+  const colores = { pending:'#fef3c7', prep:'#dbeafe', ready:'#fce7f3', done:'#d1fae5' };
+  const textCol = { pending:'#92400e', prep:'#1e40af', ready:'#9d174d', done:'#065f46' };
+  const labels  = { pending:'Pendiente', prep:'En preparación', ready:'Listo 🔔', done:'Entregado ✓' };
+  const badgeCls= { pending:'b-pending', prep:'b-prep', ready:'b-ready', done:'b-done' };
+  const html = peds.map(p => {
+    const ini = p.cliente_nombre.substring(0,2).toUpperCase();
+    const items = Array.isArray(p.items) ? p.items.map(i=>i.nombre||i).join(' · ') : '';
+    const hace = Math.round((Date.now()-new Date(p.created_at))/60000);
+    return `<div class="pedido-item" data-status="${p.estado}" data-id="${p.id}">
+      <div class="ped-avatar" style="background:${colores[p.estado]};color:${textCol[p.estado]};">${ini}</div>
+      <div class="ped-info">
+        <div class="ped-name">${p.cliente_nombre}</div>
+        <div class="ped-detail">${items || p.notas || '—'} · ${p.tipo}</div>
+        <span class="badge ${badgeCls[p.estado]}">${labels[p.estado]}</span>
+        <div class="estado-btns">
+          <button class="ebtn ebtn-pending ${p.estado==='pending'?'active-estado':''}" onclick="cambiarEstadoReal('${p.id}','pending',this.closest('.pedido-item'))">Pendiente</button>
+          <button class="ebtn ebtn-prep ${p.estado==='prep'?'active-estado':''}" onclick="cambiarEstadoReal('${p.id}','prep',this.closest('.pedido-item'))">En prep.</button>
+          <button class="ebtn ebtn-ready ${p.estado==='ready'?'active-estado':''}" onclick="cambiarEstadoReal('${p.id}','ready',this.closest('.pedido-item'))">Listo 🔔</button>
+          <button class="ebtn ebtn-done ${p.estado==='done'?'active-estado':''}" onclick="cambiarEstadoReal('${p.id}','done',this.closest('.pedido-item'))">Entregado ✓</button>
+        </div>
+      </div>
+      <div class="ped-right">
+        <div class="ped-price">$${parseInt(p.total).toLocaleString('es-CL')}</div>
+        <div class="ped-time">Hace ${hace} min</div>
+        <button onclick="waConfirmar('${p.cliente_nombre}')" style="margin-top:4px;padding:3px 8px;background:#25D366;color:#fff;border:none;border-radius:12px;font-size:10px;cursor:pointer;">💬 WA</button>
+      </div>
+    </div>`;
+  }).join('');
+  // Agregar al principio del contenedor
+  cont.innerHTML = html + cont.innerHTML;
+}
+
+async function cambiarEstadoReal(pedidoId, estado, item) {
+  // Actualizar UI inmediatamente
+  cambiarEstado(item.id || 'ped-1', estado);
+  // Actualizar en BD
+  await actualizarEstadoPedido(pedidoId, estado);
+  if(estado === 'ready') {
+    const nombre = item.querySelector('.ped-name')?.textContent || '';
+    waListo(nombre);
+  }
+}
+
+function mostrarToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0b3528;color:#c9a84c;padding:8px 20px;border-radius:20px;font-size:12px;z-index:9999;border:1px solid #8a6e2f;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// Suscripción en tiempo real a pedidos nuevos
+async function suscribirPedidos() {
+  if(!supabase) return;
+  supabase.channel('pedidos-nuevos')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, payload => {
+      mostrarToast('🔔 Nuevo pedido recibido!');
+      renderPedidosSupabase([payload.new]);
+      document.getElementById('badge-p').textContent = 
+        parseInt(document.getElementById('badge-p').textContent||0) + 1;
+    })
+    .subscribe();
+}
+
+</script>
+</body>
+</html>
