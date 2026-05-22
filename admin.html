@@ -16,17 +16,17 @@
 html,body{height:100%;font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);}
 body{display:flex;flex-direction:column;}
 .topbar{background:var(--gd);border-bottom:1.5px solid var(--gold-dim);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px;flex-shrink:0;position:sticky;top:0;z-index:100;}
-.topbar-logo{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:3px;}
+.topbar-logo{font-family:Georgia,serif;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:3px;}
 .topbar-sub{font-size:10px;color:var(--gold-dim);letter-spacing:1px;}
 .topbar-right{display:flex;align-items:center;gap:12px;}
 .status-badge{display:flex;align-items:center;gap:6px;background:rgba(22,163,74,0.15);border:1px solid rgba(22,163,74,0.3);border-radius:20px;padding:4px 12px;cursor:pointer;}
 .status-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 .status-text{font-size:11px;color:#22c55e;}
-.topbar-time{font-size:11px;color:var(--gold-dim);font-family:'Cinzel',serif;}
+.topbar-time{font-size:11px;color:var(--gold-dim);font-family:Georgia,serif;}
 .nav-tabs{background:var(--g);border-bottom:1px solid rgba(138,110,47,0.25);display:flex;padding:0 8px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
 .nav-tabs::-webkit-scrollbar{display:none;}
-.tab{background:none;border:none;color:rgba(245,232,192,0.5);font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;padding:13px 12px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;}
+.tab{background:none;border:none;color:rgba(245,232,192,0.5);font-family:Georgia,serif;font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;padding:13px 12px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;}
 .tab:hover{color:var(--gold-p);}
 .tab.active{color:var(--gold);border-bottom:2px solid var(--gold);}
 .tab-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--danger);color:#fff;width:16px;height:16px;border-radius:50%;font-size:9px;margin-left:5px;font-family:'Lato',sans-serif;}
@@ -41,7 +41,7 @@ body{display:flex;flex-direction:column;}
 .stat.blue::before{background:linear-gradient(90deg,#1d4ed8,#60a5fa);}
 .stat.red::before{background:linear-gradient(90deg,#b91c1c,#f87171);}
 .stat-label{font-size:11px;color:var(--muted);margin-bottom:5px;}
-.stat-value{font-family:'Cinzel',serif;font-size:20px;font-weight:700;}
+.stat-value{font-family:Georgia,serif;font-size:20px;font-weight:700;}
 .stat-delta{font-size:10px;margin-top:3px;}
 .stat-delta.up{color:var(--success);}
 .stat-delta.down{color:var(--danger);}
@@ -49,7 +49,7 @@ body{display:flex;flex-direction:column;}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:16px;}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px;}
 .card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.card-title{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--text);letter-spacing:1px;text-transform:uppercase;}
+.card-title{font-family:Georgia,serif;font-size:11px;font-weight:700;color:var(--text);letter-spacing:1px;text-transform:uppercase;}
 .card-body{padding:14px 16px;}
 
 /* PEDIDOS */
@@ -61,7 +61,7 @@ body{display:flex;flex-direction:column;}
 .ped-name{font-size:12px;font-weight:700;}
 .ped-detail{font-size:10px;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .ped-right{text-align:right;flex-shrink:0;}
-.ped-price{font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--g);}
+.ped-price{font-family:Georgia,serif;font-size:12px;font-weight:700;color:var(--g);}
 .ped-time{font-size:10px;color:var(--muted);margin-top:1px;}
 .badge{display:inline-block;font-size:9px;padding:2px 7px;border-radius:20px;font-weight:700;margin-top:2px;}
 .b-pending{background:#fef3c7;color:#92400e;}
@@ -86,7 +86,7 @@ body{display:flex;flex-direction:column;}
 .cli-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
 .cli-tag{font-size:9px;padding:2px 7px;background:#f0e8d8;border-radius:20px;color:var(--g);}
 .cli-right{text-align:right;flex-shrink:0;}
-.cli-ltv{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--g);}
+.cli-ltv{font-family:Georgia,serif;font-size:13px;font-weight:700;color:var(--g);}
 .cli-badge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:700;display:inline-block;margin-top:3px;}
 .bvip{background:#fef3c7;color:#92400e;}
 .bfreq{background:#dbeafe;color:#1e40af;}
@@ -100,7 +100,7 @@ body{display:flex;flex-direction:column;}
 .form-input{padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Lato',sans-serif;font-size:12px;color:var(--text);background:#fff;outline:none;transition:border-color 0.2s;}
 .form-input:focus{border-color:var(--gold);}
 .form-select{padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Lato',sans-serif;font-size:12px;color:var(--text);background:#fff;outline:none;}
-.btn-primary{background:var(--g);color:var(--gold);border:none;padding:9px 18px;border-radius:8px;font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all 0.2s;}
+.btn-primary{background:var(--g);color:var(--gold);border:none;padding:9px 18px;border-radius:8px;font-family:Georgia,serif;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all 0.2s;}
 .btn-primary:hover{background:var(--gm);}
 .btn-sm{background:#f0e8d8;color:var(--g);border:1px solid var(--border);padding:5px 10px;border-radius:6px;font-size:10px;cursor:pointer;transition:all 0.15s;}
 .btn-sm:hover{background:var(--g);color:var(--gold);}
@@ -122,7 +122,7 @@ body{display:flex;flex-direction:column;}
 .carta-item:last-child{border-bottom:none;}
 .carta-item:hover{background:#faf8f4;}
 .carta-name{flex:1;font-size:12px;}
-.carta-price{font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--g);min-width:65px;text-align:right;}
+.carta-price{font-family:Georgia,serif;font-size:12px;font-weight:700;color:var(--g);min-width:65px;text-align:right;}
 .toggle{width:32px;height:17px;border-radius:9px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
 .toggle.on{background:#22c55e;}
 .toggle.off{background:#d1d5db;}
@@ -132,18 +132,18 @@ body{display:flex;flex-direction:column;}
 
 /* CONTABILIDAD */
 .cont-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;}
-.cont-title{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--text);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.cont-title{font-family:Georgia,serif;font-size:11px;font-weight:700;color:var(--text);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .cont-badge{font-size:9px;padding:2px 8px;border-radius:20px;}
 .iva-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;}
 .iva-row:last-child{border-bottom:none;}
-.iva-row.total{font-weight:700;font-family:'Cinzel',serif;font-size:14px;color:var(--g);margin-top:4px;}
+.iva-row.total{font-weight:700;font-family:Georgia,serif;font-size:14px;color:var(--g);margin-top:4px;}
 .iva-row.total td{padding-top:8px;}
 .vtable{width:100%;border-collapse:collapse;font-size:12px;}
-.vtable th{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;padding:7px 8px;text-align:left;border-bottom:1.5px solid var(--border);}
+.vtable th{font-family:Georgia,serif;font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;padding:7px 8px;text-align:left;border-bottom:1.5px solid var(--border);}
 .vtable td{padding:9px 8px;border-bottom:1px solid var(--border);}
 .vtable tr:last-child td{border-bottom:none;}
 .vtable tr:hover td{background:#faf8f4;}
-.vtable .num{text-align:right;font-family:'Cinzel',serif;font-weight:700;}
+.vtable .num{text-align:right;font-family:Georgia,serif;font-weight:700;}
 .vtable .pos{color:var(--success);}
 .vtable .neg{color:var(--danger);}
 .alerta{display:flex;align-items:flex-start;gap:8px;padding:9px 12px;border-radius:8px;margin-bottom:7px;font-size:12px;}
@@ -151,7 +151,7 @@ body{display:flex;flex-direction:column;}
 .alerta.info{background:#dbeafe;border:1px solid #93c5fd;color:#1e40af;}
 .alerta.ok{background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;}
 .alerta.danger{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;}
-.footer-total{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;background:var(--gd);border-radius:0 0 12px 12px;font-family:'Cinzel',serif;color:var(--gold);font-size:13px;font-weight:700;}
+.footer-total{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;background:var(--gd);border-radius:0 0 12px 12px;font-family:Georgia,serif;color:var(--gold);font-size:13px;font-weight:700;}
 @media(max-width:600px){.stats-grid{grid-template-columns:1fr 1fr;}.grid2{grid-template-columns:1fr;}.main{padding:10px;}.topbar-sub,.topbar-time{display:none;}}
 </style>
 </head>
@@ -441,7 +441,7 @@ body{display:flex;flex-direction:column;}
           <select class="form-select" id="c-tipo-doc"><option>Boleta</option><option>Factura</option><option>Sin documento</option></select>
         </div>
         <div class="form-group"><label class="form-label">&nbsp;</label>
-          <div id="c-preview" style="display:none;padding:8px 12px;background:#f0faf4;border:1px solid #c8e6c9;border-radius:8px;font-family:'Cinzel',serif;font-size:13px;color:#1b5e20;font-weight:700;"></div>
+          <div id="c-preview" style="display:none;padding:8px 12px;background:#f0faf4;border:1px solid #c8e6c9;border-radius:8px;font-family:Georgia,serif;font-size:13px;color:#1b5e20;font-weight:700;"></div>
         </div>
         <div class="form-group" style="justify-content:flex-end;"><label class="form-label">&nbsp;</label><button class="btn-primary" onclick="registrarCompra()">Registrar compra</button></div>
       </div>
@@ -547,7 +547,7 @@ body{display:flex;flex-direction:column;}
         </div>
       </div>
       <div id="caja-items" style="margin-bottom:10px;display:none;">
-        <div class="card-header" style="padding:8px 12px;"><span class="card-title">Ítems del pedido</span><span id="caja-subtotal" style="font-family:'Cinzel',serif;font-weight:700;color:var(--g);">$0</span></div>
+        <div class="card-header" style="padding:8px 12px;"><span class="card-title">Ítems del pedido</span><span id="caja-subtotal" style="font-family:Georgia,serif;font-weight:700;color:var(--g);">$0</span></div>
         <div id="caja-items-list"></div>
       </div>
 
@@ -689,7 +689,7 @@ body{display:flex;flex-direction:column;}
           <div class="form-group" style="justify-content:flex-end;"><label class="form-label">&nbsp;</label><button class="btn-primary" onclick="agregarTrabajador()">Agregar</button></div>
         </div>
         <div id="liquidacion-preview" style="display:none;margin-top:10px;background:#faf8f4;border:1px solid var(--border);border-radius:8px;padding:12px;">
-          <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;margin-bottom:8px;color:var(--text);">PREVIEW LIQUIDACIÓN</div>
+          <div style="font-family:Georgia,serif;font-size:11px;font-weight:700;margin-bottom:8px;color:var(--text);">PREVIEW LIQUIDACIÓN</div>
           <div id="liq-detalle" style="font-size:12px;"></div>
         </div>
       </div>
@@ -1518,10 +1518,18 @@ function renderCajaItems(){
   list.innerHTML = cajaPlatosTemp.map(function(p,i){
     return '<div class="insumo-row" style="padding:6px 12px;">'
       +'<span style="flex:1;font-size:12px;">'+p.nombre+'</span>'
-      +'<span style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--g);">$'+p.precio.toLocaleString('es-CL')+'</span>'
-      +'<button onclick="cajaPlatosTemp.splice('+i+',1);renderCajaItems();document.getElementById('caja-total').value=cajaPlatosTemp.reduce(function(s,p){return s+p.precio;},0);calcVuelto();" class="btn-danger-sm" style="font-size:9px;">✕</button>'
+      +'<span style="font-family:Georgia,serif;font-size:12px;font-weight:700;color:var(--g);">$'+p.precio.toLocaleString('es-CL')+'</span>'
+      +'<button onclick="quitarItemCaja('+i+')" class="btn-danger-sm" style="font-size:9px;">&#x2715;</button>'
     +'</div>';
   }).join('');
+}
+
+function quitarItemCaja(i){
+  cajaPlatosTemp.splice(i,1);
+  renderCajaItems();
+  var t = cajaPlatosTemp.reduce(function(s,p){return s+p.precio;},0);
+  document.getElementById('caja-total').value = t;
+  calcVuelto();
 }
 
 function calcVuelto(){
@@ -1582,7 +1590,7 @@ function renderHistorialCaja(){
         +'<div class="ins-meta">'+p.items+'</div>'
       +'</div>'
       +'<div style="text-align:right;">'
-        +'<div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--g);">$'+p.total.toLocaleString('es-CL')+'</div>'
+        +'<div style="font-family:Georgia,serif;font-size:13px;font-weight:700;color:var(--g);">$'+p.total.toLocaleString('es-CL')+'</div>'
         +'<div style="font-size:10px;color:var(--muted);">'+pagoIcon+' '+p.hora+'</div>'
       +'</div>'
     +'</div>';
